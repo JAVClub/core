@@ -1,0 +1,33 @@
+{
+  "name": "javclub_core",
+  "version": "1.0.0",
+  "description": "JAVClub core",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm run build",
+    "dev": "NODE_ENV=dev node src/app.js",
+    "run": "NODE_ENV=stage node dist/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JAVClub/core.git"
+  },
+  "keywords": [
+    "JAV"
+  ],
+  "author": "XiaoLin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JAVClub/core/issues"
+  },
+  "homepage": "https://github.com/JAVClub/core#readme",
+  "dependencies": {
+    "config": "^3.3.0",
+    "googleapis": "39.2.0",
+    "google-auth-library": "3.1.2",
+    "googleapis-common": "0.7.2",
+    "knex": "^0.20.11",
+    "log4js": "^6.1.2",
+    "mysql": "^2.18.1"
+  }
+}

@@ -1,0 +1,15 @@
+{
+    "system": {
+        "logLevel": "debug"
+    },
+    "database": {
+        "connectionLimit": 5,
+        "host": "127.0.0.1",
+        "user": "javclub",
+        "password": "javclub",
+        "database": "javclub"
+    },
+    "driver": [
+        "googleDrive"
+    ]
+}
