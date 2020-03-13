@@ -1,7 +1,7 @@
 const db = require('./database');
 const logger = require('./logger')('Module: Video');
 const metadata = require('./metadata');
-const { attachPaginate } = require('knex-paginate');
+const {attachPaginate} = require('knex-paginate');
 attachPaginate();
 
 class Video {
@@ -12,8 +12,7 @@ class Video {
      * 
      * @returns {Object} video info
      */
-    async getVideoInfo(id)
-    {
+    async getVideoInfo(id) {
         logger.debug('Get video info, id', id);
         let result = await db('videos').where('id', id).select('*');
 
@@ -37,16 +36,14 @@ class Video {
      * 
      * @returns {Array} video info list
      */
-    async getVideoList(page = 1, size = 20, showHiden = false)
-    {
+    async getVideoList(page = 1, size = 20, showHiden = false) {
         let result = await db('videos').where('isHiden', (showHiden) ? 1 : 0).paginate({
             perPage: size,
             currentPage: page,
         }).select('*');
 
         let processed = [];
-        for (let i in result)
-        {
+        for (let i in result) {
             let item = result[i];
             processed.push({
                 id: item.id,
@@ -69,8 +66,7 @@ class Video {
      * 
      * @returns {Boolean}
      */
-    async hideVideo(id)
-    {
+    async hideVideo(id) {
         if (await db('videos').where('id', id).update('isHiden', 1)) return true;
         return false;
     }
@@ -82,8 +78,7 @@ class Video {
      * 
      * @returns {Boolean}
      */
-    async unhideVideo(id)
-    {
+    async unhideVideo(id) {
         if (await db('videos').where('id', id).update('isHiden', 0)) return true;
         return false;
     }
@@ -126,7 +121,7 @@ class Video {
             infoFileId: fileIds.metaId,
             updateTime: (new Date()).getTime(),
         }).select('id');
-        
+
         logger.info(`[${JAVID}] Video created, id`, result[0]);
         return result[0];
     }
@@ -138,8 +133,7 @@ class Video {
      * 
      * @returns {Int} video id
      */
-    async getVideoIdByInfoFileId(infoFileId)
-    {
+    async getVideoIdByInfoFileId(infoFileId) {
         let result = await db('videos').where('infoFileId', infoFileId).select('id').first();
 
         if (result && result.id) {
