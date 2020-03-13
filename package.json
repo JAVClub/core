@@ -23,11 +23,17 @@
   "homepage": "https://github.com/JAVClub/core#readme",
   "dependencies": {
     "config": "^3.3.0",
-    "googleapis": "39.2.0",
+    "dom-parser": "^0.1.6",
     "google-auth-library": "3.1.2",
+    "googleapis": "39.2.0",
     "googleapis-common": "0.7.2",
     "knex": "^0.20.11",
+    "knex-paginate": "^1.2.0",
     "log4js": "^6.1.2",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.0",
+    "p-queue": "^6.3.0",
+    "p-retry": "^4.2.0",
+    "promise-queue-plus": "^1.2.2"
   }
 }
