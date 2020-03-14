@@ -6,6 +6,55 @@ const db = require('./database');
 
 class Metadata {
     /**
+     * Get metadata info by id
+     *
+     * @param {Int} id metadata id
+     *
+     * @returns {Object} metadata info
+     */
+    async getMetadataById(id)
+    {
+        logger.debug('Get metadata info, id', id);
+        let result = await db('metadatas').where('id', id).select('*');
+
+        if (!result) return null;
+
+        result = Object.assign({}, result);
+        result.JAVID = result.companyName + '-' + result.companyId;
+
+        return Object.assign(result, await this.getMetaByMetadataId(result.id));
+    }
+
+    /**
+     * Get metadata list
+     *
+     * @param {Int} page page number
+     * @param {Int} size page size
+     *
+     * @returns {Array} metadata list
+     */
+    async getMetadataList(page, size)
+    {
+        let result = await db('metadatas').select('*').paginate({
+            perPage: size,
+            currentPage: page,
+        });
+
+        result = result.data;
+        if (!result) return [];
+
+        let processed = [];
+        for (let i in result) {
+            let item = result[i];
+            item = Object.assign({}, item);
+            item.JAVID = item.companyName + '-' + item.companyId;
+            processed.push(Object.assign(item, await this.getMetaByMetadataId(item.id)));
+        }
+
+        return processed;
+    }
+
+    /**
      * Get or create metadata id
      *
      * @param {String} JAVID in the formal of XXX-001
@@ -213,6 +262,64 @@ class Metadata {
     }
 
     /**
+     * Get meta list(tags,stars,series) by metadata id
+     *
+     * @param {Int} id metadata id
+     *
+     * @returns {Object} meta list
+     */
+    async getMetaByMetadataId(id)
+    {
+        let metas = {
+            tags: [],
+            stars: [],
+            series: "",
+        };
+
+        let result;
+        result = await db('tags_mapping').where('metadataId', id).select('*');
+        if (result)
+        {
+            for (let i in result)
+            {
+                metas.tags.push((await this.getMetaInfoByMetaId('tags', result[i].tagId))['name']);
+            }
+        }
+
+        result = await db('stars_mapping').where('metadataId', id).select('*');
+        if (result)
+        {
+            for (let i in result)
+            {
+                metas.stars.push(await this.getMetaInfoByMetaId('stars', result[i].starId));
+            }
+        }
+
+        result = await db('series_mapping').where('metadataId', id).select('*').first();
+        if (result) metas.series = (await this.getMetaInfoByMetaId('series', result.id))['name'];
+
+        return metas;
+    }
+
+    /**
+     * Get meta info by meta id
+     *
+     * @param {String} type meta type, tags/stars/series
+     * @param {Int} id meta id
+     *
+     * @returns {Object} meta info
+     */
+    async getMetaInfoByMetaId(type, id)
+    {
+        logger.debug(`Get ${type} info, id`, id);
+        let result = await db(type).where('id', id).select('*').first();
+
+        if (!result) return null;
+
+        return Object.assign({}, result);
+    }
+
+    /**
      * Attach meta to meatdata table
      *
      * @param {String} type
@@ -252,7 +359,7 @@ class Metadata {
                 await db.transaction(async trx => {
                     if (count[0]['count(*)'] === 0) {
                         logger.debug('Create mapping, count', count, count[0]['count(*)']);
-                        
+
                         let data = {
                             metadataId,
                             updateTime: (new Date()).getTime(),
