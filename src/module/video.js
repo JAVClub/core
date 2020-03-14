@@ -1,23 +1,24 @@
 const db = require('./database');
 const logger = require('./logger')('Module: Video');
 const metadata = require('./metadata');
-const {attachPaginate} = require('knex-paginate');
-attachPaginate();
 
 class Video {
     /**
      * Get video info by id
-     * 
+     *
      * @param {Int} id video id
-     * 
+     *
      * @returns {Object} video info
      */
     async getVideoInfo(id) {
         logger.debug('Get video info, id', id);
         let result = await db('videos').where('id', id).select('*');
 
+        if (!result) return null;
+
         return {
             id: result.id,
+            metadataId: result.metadataId,
             videoFileId: result.videoFileId,
             isHiden: (result.isHiden) ? true : false,
             infoFileId: result.infoFileId,
@@ -29,24 +30,33 @@ class Video {
 
     /**
      * Get video list
-     * 
+     *
      * @param {Int=} page page number
      * @param {Int=} size page size
      * @param {Boolean=} showHiden show hiden video
-     * 
+     * @param {Int=} get list by metadata id
+     *
      * @returns {Array} video info list
      */
-    async getVideoList(page = 1, size = 20, showHiden = false) {
-        let result = await db('videos').where('isHiden', (showHiden) ? 1 : 0).paginate({
+    async getVideoList(page = 1, size = 20, showHiden = false, metadataId = 0) {
+        let result;
+        result = db('videos');
+        if (!showHiden) result = result.where('isHiden', 0);
+        if (metadataId !== 0) result = result.where('metadataId', metadataId);
+        result = await result.select('*').paginate({
             perPage: size,
             currentPage: page,
-        }).select('*');
+        });
+
+        result = result.data;
+        if (!result) return [];
 
         let processed = [];
         for (let i in result) {
             let item = result[i];
             processed.push({
                 id: item.id,
+                metadataId: item.metadataId,
                 videoFileId: item.videoFileId,
                 isHiden: (item.isHiden) ? true : false,
                 infoFileId: item.infoFileId,
@@ -61,9 +71,9 @@ class Video {
 
     /**
      * Hide video by video id
-     * 
+     *
      * @param {Int} id video id
-     * 
+     *
      * @returns {Boolean}
      */
     async hideVideo(id) {
@@ -73,9 +83,9 @@ class Video {
 
     /**
      * Unhide video by video id
-     * 
+     *
      * @param {Int} id video id
-     * 
+     *
      * @returns {Boolean}
      */
     async unhideVideo(id) {
@@ -128,9 +138,9 @@ class Video {
 
     /**
      * Get video id by info.json file id
-     * 
-     * @param {String} infoFileId 
-     * 
+     *
+     * @param {String} infoFileId
+     *
      * @returns {Int} video id
      */
     async getVideoIdByInfoFileId(infoFileId) {
