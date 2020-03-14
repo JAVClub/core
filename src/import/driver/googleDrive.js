@@ -16,7 +16,7 @@ class googleDrive {
             default: PQueue
         } = require('p-queue');
         this.queue = new PQueue({
-            concurrency: 5,
+            concurrency: 8,
         });
 
         stack.getInstance(id).then((c) => {
@@ -113,9 +113,9 @@ class googleDrive {
 
     /**
      * Create file records for file bundle
-     * 
+     *
      * @param {Object} data files info
-     * 
+     *
      * @returns {Object} file ids
      */
     async createFileRecord(data) {

@@ -68,7 +68,7 @@ class Metadata {
             try {
                 let metadataId;
                 if (metadataId = await db('metadatas')
-                    .where('companyName', JAVID.split('0')[0])
+                    .where('companyName', JAVID.split('-')[0])
                     .where('companyId', JAVID.split('-')[1])
                     .first()) {
                     resolve(metadataId.id);
