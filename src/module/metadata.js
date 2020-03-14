@@ -12,8 +12,7 @@ class Metadata {
      *
      * @returns {Object} metadata info
      */
-    async getMetadataById(id)
-    {
+    async getMetadataById(id) {
         logger.debug('Get metadata info, id', id);
         let result = await db('metadatas').where('id', id).select('*');
 
@@ -33,8 +32,7 @@ class Metadata {
      *
      * @returns {Array} metadata list
      */
-    async getMetadataList(page, size)
-    {
+    async getMetadataList(page, size) {
         let result = await db('metadatas').select('*').paginate({
             perPage: size,
             currentPage: page,
@@ -268,8 +266,7 @@ class Metadata {
      *
      * @returns {Object} meta list
      */
-    async getMetaByMetadataId(id)
-    {
+    async getMetaByMetadataId(id){
         let metas = {
             tags: [],
             stars: [],
@@ -309,8 +306,7 @@ class Metadata {
      *
      * @returns {Object} meta info
      */
-    async getMetaInfoByMetaId(type, id)
-    {
+    async getMetaInfoByMetaId(type, id){
         logger.debug(`Get ${type} info, id`, id);
         let result = await db(type).where('id', id).select('*').first();
 
