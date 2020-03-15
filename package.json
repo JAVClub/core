@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/JAVClub/core#readme",
   "dependencies": {
+    "bcrypt": "^4.0.1",
     "config": "^3.3.0",
     "cookie-parser": "^1.4.4",
     "dom-parser": "^0.1.6",
