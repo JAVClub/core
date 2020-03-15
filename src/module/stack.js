@@ -1,13 +1,11 @@
-const logger = require('./logger')('Stack');
-const db = require('./database');
-const gdClass = require('./driver/googleDrive');
+const logger = require('./logger')('Stack')
+const db = require('./database')
+const GDClass = require('./driver/googleDrive')
 
-class stack {
-    instances
-
-    constructor() {
-        this.instances = {};
-        logger.info('Stack created');
+class Stack {
+    constructor () {
+        this.instances = {}
+        logger.info('Stack created')
     }
 
     /**
@@ -16,27 +14,27 @@ class stack {
      * @param {Int} id Driver Id
      * @returns {Object} Driver Instance
      */
-    async getInstance(id) {
-        if (this.instances[id]) return this.instances[id];
+    async getInstance (id) {
+        if (this.instances[id]) return this.instances[id]
 
-        logger.info('Creating Instance', id);
-        let result = await db('drivers').where('isEnable', 1).where('id', id).first();
+        logger.info('Creating Instance', id)
+        const result = await db('drivers').where('isEnable', 1).where('id', id).first()
         if (result) {
-            logger.debug(result);
+            logger.debug(result)
             switch (result.driverType) {
-                case 'gd':
-                    this.instances[id] = new gdClass(id, JSON.parse(result.driverData));
-                    await this.instances[id].refreshToken();
-                    return this.instances[id];
+            case 'gd':
+                this.instances[id] = new GDClass(id, JSON.parse(result.driverData))
+                await this.instances[id].refreshToken()
+                return this.instances[id]
 
-                default:
+            default:
                     // DO NOTHING
             }
         }
 
-        logger.error(`Driver ${id} not found`);
-        throw new Error(`Driver ${id} not found`);
+        logger.error(`Driver ${id} not found`)
+        throw new Error(`Driver ${id} not found`)
     }
 }
 
-module.exports = new stack();
+module.exports = new Stack()

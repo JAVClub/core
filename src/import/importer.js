@@ -1,9 +1,8 @@
-const db = require('../module/database');
-const logger = require('../module/logger');
+const db = require('../module/database')
+const logger = require('../module/logger')
 
-class importer
-{
+class importer {
 
 }
 
-module.exports = importer;
+module.exports = importer

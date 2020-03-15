@@ -1,6 +1,6 @@
-const db = require('./database');
-const logger = require('./logger')('Module: Video');
-const metadata = require('./metadata');
+const db = require('./database')
+const logger = require('./logger')('Module: Video')
+const metadata = require('./metadata')
 
 class Video {
     /**
@@ -10,22 +10,22 @@ class Video {
      *
      * @returns {Object} video info
      */
-    async getVideoInfo(id) {
-        logger.debug('Get video info, id', id);
-        let result = await db('videos').where('id', id).select('*');
+    async getVideoInfo (id) {
+        logger.debug('Get video info, id', id)
+        const result = await db('videos').where('id', id).select('*')
 
-        if (!result) return null;
+        if (!result) return null
 
         return {
             id: result.id,
             metadataId: result.metadataId,
             videoFileId: result.videoFileId,
-            isHiden: (result.isHiden) ? true : false,
+            isHiden: !!(result.isHiden),
             infoFileId: result.infoFileId,
             videoMetadata: JSON.parse(result.videoMetadata),
             storyboardFileIdSet: JSON.parse(result.storyboardFileIdSet),
-            updateTime: result.updateTime,
-        };
+            updateTime: result.updateTime
+        }
     }
 
     /**
@@ -38,35 +38,35 @@ class Video {
      *
      * @returns {Array} video info list
      */
-    async getVideoList(page = 1, size = 20, showHiden = false, metadataId = 0) {
-        let result;
-        result = db('videos');
-        if (!showHiden) result = result.where('isHiden', 0);
-        if (metadataId !== 0) result = result.where('metadataId', metadataId);
+    async getVideoList (page = 1, size = 20, showHiden = false, metadataId = 0) {
+        let result
+        result = db('videos')
+        if (!showHiden) result = result.where('isHiden', 0)
+        if (metadataId !== 0) result = result.where('metadataId', metadataId)
         result = await result.select('*').paginate({
             perPage: size,
-            currentPage: page,
-        });
+            currentPage: page
+        })
 
-        result = result.data;
-        if (!result) return [];
+        result = result.data
+        if (!result) return []
 
-        let processed = [];
-        for (let i in result) {
-            let item = result[i];
+        const processed = []
+        for (const i in result) {
+            const item = result[i]
             processed.push({
                 id: item.id,
                 metadataId: item.metadataId,
                 videoFileId: item.videoFileId,
-                isHiden: (item.isHiden) ? true : false,
+                isHiden: !!(item.isHiden),
                 infoFileId: item.infoFileId,
                 videoMetadata: JSON.parse(item.videoMetadata),
                 storyboardFileIdSet: JSON.parse(item.storyboardFileIdSet),
-                updateTime: item.updateTime,
-            });
+                updateTime: item.updateTime
+            })
         }
 
-        return processed;
+        return processed
     }
 
     /**
@@ -76,9 +76,9 @@ class Video {
      *
      * @returns {Boolean}
      */
-    async hideVideo(id) {
-        if (await db('videos').where('id', id).update('isHiden', 1)) return true;
-        return false;
+    async hideVideo (id) {
+        if (await db('videos').where('id', id).update('isHiden', 1)) return true
+        return false
     }
 
     /**
@@ -88,9 +88,9 @@ class Video {
      *
      * @returns {Boolean}
      */
-    async unhideVideo(id) {
-        if (await db('videos').where('id', id).update('isHiden', 0)) return true;
-        return false;
+    async unhideVideo (id) {
+        if (await db('videos').where('id', id).update('isHiden', 0)) return true
+        return false
     }
 
     /**
@@ -104,22 +104,22 @@ class Video {
      *
      * @returns {Int} Video id
      */
-    async createVideo(info, fileIds) {
-        let JAVID = info.company + '-' + info.id;
+    async createVideo (info, fileIds) {
+        const JAVID = info.company + '-' + info.id
 
-        let result = await db('videos').whereRaw('JSON_EXTRACT(videoMetadata, \'$.hash\') = ?', info.hash).select('id').first();
-        logger.debug('JAV hash', info.hash, result);
+        let result = await db('videos').whereRaw('JSON_EXTRACT(videoMetadata, \'$.hash\') = ?', info.hash).select('id').first()
+        logger.debug('JAV hash', info.hash, result)
 
         if (result && result.id) {
-            logger.info('Duplicate video exist, skipped', result);
-            return result.id;
+            logger.info('Duplicate video exist, skipped', result)
+            return result.id
         }
 
-        let metaId = await metadata.getMetadataId(JAVID);
-        logger.debug('Metadata id', metaId);
+        const metaId = await metadata.getMetadataId(JAVID)
+        logger.debug('Metadata id', metaId)
 
         if (metaId === 0) {
-            return;
+            return
         }
 
         result = await db('videos').insert({
@@ -129,11 +129,11 @@ class Video {
             metadataId: metaId,
             storyboardFileIdSet: JSON.stringify(fileIds.storyboardId),
             infoFileId: fileIds.metaId,
-            updateTime: (new Date()).getTime(),
-        }).select('id');
+            updateTime: (new Date()).getTime()
+        }).select('id')
 
-        logger.info(`[${JAVID}] Video created, id`, result[0]);
-        return result[0];
+        logger.info(`[${JAVID}] Video created, id`, result[0])
+        return result[0]
     }
 
     /**
@@ -143,13 +143,13 @@ class Video {
      *
      * @returns {Int} video id
      */
-    async getVideoIdByInfoFileId(infoFileId) {
-        let result = await db('videos').where('infoFileId', infoFileId).select('id').first();
+    async getVideoIdByInfoFileId (infoFileId) {
+        const result = await db('videos').where('infoFileId', infoFileId).select('id').first()
 
         if (result && result.id) {
-            return result.id;
-        } else return 0;
+            return result.id
+        } else return 0
     }
 }
 
-module.exports = new Video();
+module.exports = new Video()

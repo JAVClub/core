@@ -1,38 +1,28 @@
-const {google} = require('googleapis');
-const pRetry = require('p-retry');
-let logger;
+const { google } = require('googleapis')
+const pRetry = require('p-retry')
+let logger
 
 class GoogleDrive {
-    oAuth2Client
-    driveClient
-    _data
-
     /**
      * Create a instance of Google Drive Driver
      *
      * @param {Number} id
      * @param {Object=} data
      */
-    constructor(id, data = {}) {
-        logger = require('../logger')(`Driver[${id}]: Google Drive`);
+    constructor (id, data = {}) {
+        logger = require('../logger')(`Driver[${id}]: Google Drive`)
         if (data.oAuth) {
-            let {
-                client_id,
-                client_secret,
-                redirect_uri,
-                token
-            } = data.oAuth;
-            this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
-            this.oAuth2Client.setCredentials(token);
+            this.oAuth2Client = new google.auth.OAuth2(data.oAuth.client_id, data.oAuth.client_secret, data.oAuth.redirect_uri)
+            this.oAuth2Client.setCredentials(data.oAuth.token)
         }
 
         if (data.drive) {
             this.driveClient = google.drive({
-                version: "v3",
-                auth: this.oAuth2Client,
-            });
+                version: 'v3',
+                auth: this.oAuth2Client
+            })
         }
-        this._data = data;
+        this._data = data
     }
 
     /**
@@ -42,38 +32,32 @@ class GoogleDrive {
      *
      * @returns {Object} Google Driver configuration
      */
-    async authorizeWithCode(data) {
-        data = data.oAuth;
+    async authorizeWithCode (data) {
+        data = data.oAuth
         if (!this.oAuth2Client) {
-            let {
-                client_id,
-                client_secret,
-                redirect_uri,
-                code
-            } = data;
-            this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
+            this.oAuth2Client = new google.auth.OAuth2(data.client_id, data.client_secret, data.redirect_uri)
         }
 
-        logger.info('Retrieving access token');
+        logger.info('Retrieving access token')
         return new Promise((resolve, reject) => {
             this.oAuth2Client.getToken(data.code, (error, token) => {
                 if (error) {
-                    logger.error('Error retrieving access token', error);
-                    reject('Error retrieving access token');
-                    return;
+                    logger.error('Error retrieving access token', error)
+                    reject(new Error('Error retrieving access token'))
+                    return
                 }
-                logger.info('Got access token');
-                logger.debug(token);
-                this.oAuth2Client.setCredentials(token);
+                logger.info('Got access token')
+                logger.debug(token)
+                this.oAuth2Client.setCredentials(token)
 
                 resolve({
                     client_id: data.client_id,
                     client_secret: data.client_secret,
                     redirect_uri: data.redirect_uri,
-                    token,
-                });
-            });
-        });
+                    token
+                })
+            })
+        })
     }
 
     /**
@@ -83,38 +67,32 @@ class GoogleDrive {
      *
      * @returns {Object} Google Driver configuration
      */
-    async refreshToken(data) {
-        if (!data) data = this._data;
-        data = data.oAuth;
+    async refreshToken (data) {
+        if (!data) data = this._data
+        data = data.oAuth
         if (!this.oAuth2Client) {
-            let {
-                client_id,
-                client_secret,
-                redirect_uri,
-                token
-            } = data;
-            this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
-            this.oAuth2Client.setCredentials(token);
+            this.oAuth2Client = new google.auth.OAuth2(data.client_id, data.client_secret, data.redirect_uri)
+            this.oAuth2Client.setCredentials(data.token)
         }
 
-        let expiry_date = this.oAuth2Client.credentials['expiry_date'];
-        logger.debug('Token expiry date', expiry_date);
-        if (((new Date()).getTime() + 600000) < expiry_date) return;
+        const expiryDate = this.oAuth2Client.credentials.expiry_date
+        logger.debug('Token expiry date', expiryDate)
+        if (((new Date()).getTime() + 600000) < expiryDate) return
 
-        logger.info('Refreshing access token');
+        logger.info('Refreshing access token')
         return new Promise((resolve, reject) => {
             this.oAuth2Client.refreshAccessToken((error, token) => {
                 if (error) {
-                    logger.error('Error refreshing access token', error);
-                    reject('Error refreshing access token');
-                    return;
+                    logger.error('Error refreshing access token', error)
+                    reject(new Error('Error refreshing access token'))
+                    return
                 }
 
-                logger.info('Got access token');
-                logger.debug(token);
-                resolve(token);
-            });
-        });
+                logger.info('Got access token')
+                logger.debug(token)
+                resolve(token)
+            })
+        })
     }
 
     /**
@@ -127,49 +105,49 @@ class GoogleDrive {
      *
      * @returns {Array} File list
      */
-    async getFileList(q, fields, full, orderBy) {
-        fields = fields || 'id, name, modifiedTime, parents, size';
-        full = full || false;
+    async getFileList (q, fields, full, orderBy) {
+        fields = fields || 'id, name, modifiedTime, parents, size'
+        full = full || false
 
-        if (!this.checkAuthorizationStatus()) return;
+        if (!this.checkAuthorizationStatus()) return
 
-        let data = [];
-        let pageToken;
-        let counter = 1;
+        let data = []
+        let pageToken
+        let counter = 1
 
-        logger.info('Getting full file list of keyword', q);
+        logger.info('Getting full file list of keyword', q)
         do {
-            logger.debug(`Getting page ${counter}`);
-            let params = {
+            logger.debug(`Getting page ${counter}`)
+            const params = {
                 driveId: this._data.drive.driveId,
                 corpora: 'drive',
                 includeItemsFromAllDrives: true,
                 supportsTeamDrives: true,
                 pageSize: 1000,
-                orderBy: orderBy ? orderBy : 'modifiedTime desc',
+                orderBy: orderBy || 'modifiedTime desc',
                 q,
-                fields: 'nextPageToken, files(' + fields + ')',
-            };
-            if (pageToken) params.pageToken = pageToken;
+                fields: 'nextPageToken, files(' + fields + ')'
+            }
+            if (pageToken) params.pageToken = pageToken
             let res = await pRetry(async () => {
-                let result = await this.driveClient.files.list(params);
+                const result = await this.driveClient.files.list(params)
 
-                return result;
+                return result
             }, {
                 onFailedAttempt: error => {
-                    logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`);
+                    logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
                 },
-                retries: 3,
-            });
-            res = res.data;
-            if (res.nextPageToken && full) pageToken = res.nextPageToken;
-            else pageToken = null;
-            data = data.concat(res.files);
-            counter++;
-        } while (pageToken);
+                retries: 3
+            })
+            res = res.data
+            if (res.nextPageToken && full) pageToken = res.nextPageToken
+            else pageToken = null
+            data = data.concat(res.files)
+            counter++
+        } while (pageToken)
 
-        logger.info(`Got ${data.length} files' metadatas`);
-        return data;
+        logger.info(`Got ${data.length} files' metadatas`)
+        return data
     }
 
     /**
@@ -179,33 +157,33 @@ class GoogleDrive {
      *
      * @returns {ArrayBuffer} File buffer
      */
-    async downloadFile(fileId) {
-        if (!this.checkAuthorizationStatus()) return;
+    async downloadFile (fileId) {
+        if (!this.checkAuthorizationStatus()) return
 
-        logger.info('Downloading file', fileId);
+        logger.info('Downloading file', fileId)
 
         let res = await pRetry(async () => {
-            let result = await this.driveClient.files.get({
+            const result = await this.driveClient.files.get({
                 corpora: 'drive',
                 includeItemsFromAllDrives: true,
                 supportsTeamDrives: true,
                 driveId: this._data.drive.driveId,
                 alt: 'media',
-                fileId,
+                fileId
             }, {
                 responseType: 'arraybuffer'
-            });
+            })
 
-            return result;
+            return result
         }, {
             onFailedAttempt: error => {
-                logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`);
+                logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
             },
-            retries: 3,
-        });
+            retries: 3
+        })
 
-        res = Buffer.from(res.data, 'binary');
-        return res;
+        res = Buffer.from(res.data, 'binary')
+        return res
     }
 
     /**
@@ -213,14 +191,14 @@ class GoogleDrive {
      *
      * @returns {Boolean} status
      */
-    checkAuthorizationStatus() {
+    checkAuthorizationStatus () {
         if (!this.oAuth2Client || !this.driveClient) {
-            logger.error('Havn\'t authorize yet.');
-            return false;
+            logger.error('Havn\'t authorize yet.')
+            return false
         }
 
-        return true;
+        return true
     }
 }
 
-module.exports = GoogleDrive;
+module.exports = GoogleDrive
