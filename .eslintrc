@@ -1,5 +1,11 @@
 {
     "rules": {
         "indent": ["error", 4]
+    },
+    "parserOptions": {
+        "ecmaVersion": 2017
+    },
+    "env": {
+        "es6": true
     }
 }
