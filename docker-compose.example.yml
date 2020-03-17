@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
 
-  nginx:
+  core:
     image: javclub/core:latest
     ports:
       - 3000:3000
