@@ -10,7 +10,7 @@ class googleDrive {
      */
     constructor (id, driver) {
         this.id = id
-        this.driver = driver
+        this.client = driver
 
         if (!this.client) throw new Error('Invaild drive instance')
         logger.info('Got drive instance')

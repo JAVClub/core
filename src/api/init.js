@@ -9,18 +9,19 @@ const config = require('./../module/config')
 app.use(cookieParser())
 app.use(bodyParser.json())
 app.use(async (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
     logger.debug(req.method.toUpperCase(), req.path)
     const path = '' + req.path
+    if (req.cookies && req.cookies.token) {
+        const token = req.cookies.token
+        const uid = await user.verifyToken(token)
+        if (uid > 0) {
+            req.uid = uid
+        }
+    }
 
     if (!path.startsWith('/api/auth')) {
-        if (req.cookies && req.cookies.token) {
-            const token = req.cookies.token
-            const uid = await user.verifyToken(token)
-            if (uid > 0) {
-                req.uid = uid
-                return next()
-            }
-        }
+        if (req.uid) return next()
 
         res.status(403).json({
             code: -1,
@@ -37,6 +38,9 @@ app.use('/api/auth', require('./route/auth'))
 app.use('/api/video', require('./route/video'))
 app.use('/api/metadata', require('./route/metadata'))
 app.use('/api/bookmark', require('./route/bookmark'))
+app.use('/api/file', require('./route/file'))
+app.use('/api/statistic', require('./route/statistic'))
+app.use('/api/user', require('./route/user'))
 
 app.all('*', (req, res) => {
     res.status(404).json({

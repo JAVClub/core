@@ -20,7 +20,7 @@ class Video {
             id: result.id,
             metadataId: result.metadataId,
             videoFileId: result.videoFileId,
-            isHiden: !!(result.isHiden),
+            isHiden: (item.isHiden === 1),
             infoFileId: result.infoFileId,
             videoMetadata: JSON.parse(result.videoMetadata),
             storyboardFileIdSet: JSON.parse(result.storyboardFileIdSet),
@@ -43,7 +43,7 @@ class Video {
         result = db('videos')
         if (!showHiden) result = result.where('isHiden', 0)
         if (metadataId !== 0) result = result.where('metadataId', metadataId)
-        result = await result.select('*').paginate({
+        result = await result.orderBy('id', 'desc').select('*').paginate({
             perPage: size,
             currentPage: page
         })
@@ -58,7 +58,7 @@ class Video {
                 id: item.id,
                 metadataId: item.metadataId,
                 videoFileId: item.videoFileId,
-                isHiden: !!(item.isHiden),
+                isHiden: (item.isHiden === 1),
                 infoFileId: item.infoFileId,
                 videoMetadata: JSON.parse(item.videoMetadata),
                 storyboardFileIdSet: JSON.parse(item.storyboardFileIdSet),

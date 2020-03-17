@@ -74,4 +74,30 @@ router.get('/getListByMeta/:type/:metaId/:page?/:size?', async (req, res) => {
     })
 })
 
+router.get('/getMetaList/:type/:page?/:size?', async (req, res) => {
+    let { type, page, size } = req.params
+    page = parseInt(page || 1)
+    size = parseInt(size || 20)
+    logger.debug(`Type ${type}, page ${page}, size ${size}`)
+
+    if (page < 1 || size < 1 || size > 50) {
+        res.json({
+            code: -2,
+            msg: 'Param error',
+            data: {}
+        })
+        return
+    }
+
+    type = metadata._getTypeMapping(type).type
+
+    let result = await metadata.getMetaList(type, page, size)
+
+    res.json({
+        code: 0,
+        msg: 'Success',
+        data: result
+    })
+})
+
 module.exports = router

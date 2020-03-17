@@ -36,10 +36,13 @@ class Metadata {
      * @returns {Array} metadata list
      */
     async getMetadataList (page, size) {
-        let result = await db('metadatas').select('*').paginate({
+        let result = await db('metadatas').orderBy('id', 'desc').select('*').paginate({
             perPage: size,
             currentPage: page
         })
+
+        let total = await db('metadatas').count()
+        total = total[0]['count(*)']
 
         result = result.data
         if (!result) return []
@@ -52,7 +55,10 @@ class Metadata {
             processed.push(Object.assign(item, await this.getMetaByMetadataId(item.id)))
         }
 
-        return processed
+        return {
+            total,
+            data: processed
+        }
     }
 
     /**
@@ -68,22 +74,29 @@ class Metadata {
     async getMetadataListByMetaId (type, metaId, page, size) {
         const mapping = this._getTypeMapping(type)
 
-        let result = await db(`${mapping.type}_mapping`).where(mapping.column, metaId).select('metadataId').paginate({
+        let result = await db(`${mapping.type}_mapping`).where(mapping.column, metaId).orderBy('id', 'desc').select('metadataId').paginate({
             perPage: size,
             currentPage: page
         })
+
+        let total = await db(`${mapping.type}_mapping`).where(mapping.column, metaId).count()
+        total = total[0]['count(*)']
 
         result = result.data
         if (!result) return []
 
         const processed = []
         for (const i in result) {
-            let metadataId = result[i].metadataId
+            const metadataId = result[i].metadataId
 
             processed.push(await this.getMetadataById(metadataId))
         }
 
-        return processed
+        return {
+            total,
+            data: processed,
+            metaInfo: await this.getMetaInfoByMetaId(this._getTypeMapping(type).type, metaId)
+        }
     }
 
     /**
@@ -99,7 +112,7 @@ class Metadata {
         return new Promise(async (resolve) => {
             try {
                 const metadataId = await db('metadatas').where('companyName', JAVID.split('-')[0]).where('companyId', JAVID.split('-')[1]).first()
-                if (metadataId) {
+                if (metadataId && metadataId.id) {
                     resolve(metadataId.id)
                 } else {
                     await db.transaction(async trx => {
@@ -252,6 +265,39 @@ class Metadata {
     }
 
     /**
+     * Get meta list
+     *
+     * @param {String} type meta type
+     * @param {Int} page page number
+     * @param {Int} size page size
+     *
+     * @returns {Array} meta list
+     */
+    async getMetaList (type, page, size) {
+        let result = await db(type).select('*').paginate({
+            perPage: size,
+            currentPage: page
+        })
+
+        let total = await db(type).count()
+        total = total[0]['count(*)']
+
+        result = result.data
+        if (!result) return []
+
+        const processed = []
+        for (const i in result) {
+            let item = result[i]
+            processed.push(Object.assign({}, item))
+        }
+
+        return {
+            total,
+            data: processed
+        }
+    }
+
+    /**
      * Get or create multiple types of metas' id
      *
      * @param {String} type value can be: tags, stars, series
@@ -396,7 +442,7 @@ class Metadata {
      *
      * @returns {Object}
      */
-    _getTypeMapping(type) {
+    _getTypeMapping (type) {
         const map = {}
         switch (type) {
         case 'tag':

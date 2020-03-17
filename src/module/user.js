@@ -47,6 +47,43 @@ class User {
     }
 
     /**
+     * Change user's username
+     *
+     * @param {Int} uid user id
+     * @param {String} newUsername new username
+     *
+     * @returns {Int}
+     */
+    async changeUsername(uid, newUsername) {
+        let result = await db('users').where('id', uid).update({
+            username: newUsername,
+            lastSeen: (new Date()).getTime()
+        })
+
+        return result
+    }
+
+    /**
+     * Change user's password
+     *
+     * @param {Int} uid user id
+     * @param {String} newPassword new password
+     *
+     * @returns {Int}
+     */
+    async changePassword(uid, newPassword) {
+        let password = bcrypt.hashSync(newPassword, bcrypt.genSaltSync())
+
+        let result = await db('users').where('id', uid).update({
+            password: password,
+            token: randomString.generate(32),
+            lastSeen: (new Date()).getTime()
+        })
+
+        return result
+    }
+
+    /**
      * Verify token
      *
      * @param {String} token token

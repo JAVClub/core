@@ -1,5 +1,8 @@
 const { google } = require('googleapis')
 const pRetry = require('p-retry')
+const cryptoJs = require('crypto-js')
+const base64 = require('js-base64').Base64
+const randomInt = require('random-int')
 let logger
 
 class GoogleDrive {
@@ -148,6 +151,22 @@ class GoogleDrive {
 
         logger.info(`Got ${data.length} files' metadatas`)
         return data
+    }
+
+    /**
+     * Get file download URL
+     *
+     * @param {String} Google Drive file storage data
+     *
+     * @returns {String} URL
+     */
+    async getFileURL(storageData) {
+        if (this._data.encryption && this._data.encryption.secret && this._data.encryption.server) {
+            let uri = cryptoJs.AES.encrypt(this._data.drive.driveId + '||!||' + storageData.fileId, this._data.encryption.secret).toString()
+            let server = this._data.encryption.server.split(',')
+            return server[randomInt(0, server.length - 1)] + '/' +  base64.encode(uri)
+        }
+        return ''
     }
 
     /**

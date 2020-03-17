@@ -24,7 +24,7 @@ router.post('/login', async (req, res) => {
             })
             return
         } else {
-            res.status(403).json({
+            res.json({
                 code: -1,
                 msg: 'Username or password wrong',
                 data: {}
@@ -37,6 +37,19 @@ router.post('/login', async (req, res) => {
         code: -2,
         msg: 'Invalid body',
         data: {}
+    })
+})
+
+router.get('/check', (req, res) => {
+    let result = false
+    if (req.uid && req.uid > 0) result = true
+
+    res.json({
+        code: 0,
+        msg: 'Success',
+        data: {
+            isLogin: result
+        }
     })
 })
 

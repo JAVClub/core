@@ -32,6 +32,10 @@ class Bookmark {
      * @returns {Int} bookmark mapping id
      */
     async addMetadata (bookmarkId, metadataId) {
+        let num = await db('bookmarks_mapping').where('bookmarkId', bookmarkId).where('metadataId', metadataId).count()
+
+        if (num && num[0]['count(*)'] !== 0) return true
+
         let result = await db('bookmarks_mapping').insert({
             bookmarkId,
             metadataId,
@@ -57,10 +61,13 @@ class Bookmark {
             id: bookmarkName.id,
             name: bookmarkName.name
         }
-        let metadatas = await db('bookmarks_mapping').where('bookmarkId', id).select('*').paginate({
+        let metadatas = await db('bookmarks_mapping').where('bookmarkId', id).orderBy('id', 'desc').select('*').paginate({
             perPage: size,
             currentPage: page
         })
+
+        let total = await db('bookmarks_mapping').where('bookmarkId', id).count()
+        total = total[0]['count(*)']
 
         let processed = []
         metadatas = metadatas.data
@@ -70,6 +77,7 @@ class Bookmark {
         }
 
         return {
+            total,
             name: bookmarkName.name,
             metadatas: processed
         }
@@ -92,13 +100,13 @@ class Bookmark {
     /**
      * Remove metadata from bookmark
      *
-     * @param {Int} id bookmark id
+     * @param {Int} bookmarkId bookmark id
      * @param {Int} metadataId metadata id
      *
      * @returns {Boolean}
      */
-    async removeMetadata(id, metadataId) {
-        let result = await db('bookmarks_mapping').where('bookmarkId', id).where('metadataId', metadataId).delete()
+    async removeMetadata(bookmarkId, metadataId) {
+        let result = await db('bookmarks_mapping').where('bookmarkId', bookmarkId).where('metadataId', metadataId).delete()
 
         if (result) return true
         return false
