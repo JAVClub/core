@@ -1,0 +1,14 @@
+version: '3.2'
+
+services:
+
+  nginx:
+    image: javclub/core:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - ./config:/usr/src/app/config
+    environment:
+      NODE_ENV: "dev"
+      TZ: ${TZ}
+    restart: on-failure
