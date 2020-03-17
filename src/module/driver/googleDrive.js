@@ -3,7 +3,6 @@ const pRetry = require('p-retry')
 const cryptoJs = require('crypto-js')
 const base64 = require('js-base64').Base64
 const randomInt = require('random-int')
-let logger
 
 class GoogleDrive {
     /**
@@ -13,7 +12,7 @@ class GoogleDrive {
      * @param {Object=} data
      */
     constructor (id, data = {}) {
-        logger = require('../logger')(`Driver[${id}]: Google Drive`)
+        this.logger = require('../logger')(`Driver[${id}]: Google Drive`)
         if (data.oAuth) {
             this.oAuth2Client = new google.auth.OAuth2(data.oAuth.client_id, data.oAuth.client_secret, data.oAuth.redirect_uri)
             this.oAuth2Client.setCredentials(data.oAuth.token)
@@ -41,16 +40,16 @@ class GoogleDrive {
             this.oAuth2Client = new google.auth.OAuth2(data.client_id, data.client_secret, data.redirect_uri)
         }
 
-        logger.info('Retrieving access token')
+        this.logger.info('Retrieving access token')
         return new Promise((resolve, reject) => {
             this.oAuth2Client.getToken(data.code, (error, token) => {
                 if (error) {
-                    logger.error('Error retrieving access token', error)
+                    this.logger.error('Error retrieving access token', error)
                     reject(new Error('Error retrieving access token'))
                     return
                 }
-                logger.info('Got access token')
-                logger.debug(token)
+                this.logger.info('Got access token')
+                this.logger.debug(token)
                 this.oAuth2Client.setCredentials(token)
 
                 resolve({
@@ -79,20 +78,20 @@ class GoogleDrive {
         }
 
         const expiryDate = this.oAuth2Client.credentials.expiry_date
-        logger.debug('Token expiry date', expiryDate)
+        this.logger.debug('Token expiry date', expiryDate)
         if (((new Date()).getTime() + 600000) < expiryDate) return
 
-        logger.info('Refreshing access token')
+        this.logger.info('Refreshing access token')
         return new Promise((resolve, reject) => {
             this.oAuth2Client.refreshAccessToken((error, token) => {
                 if (error) {
-                    logger.error('Error refreshing access token', error)
+                    this.logger.error('Error refreshing access token', error)
                     reject(new Error('Error refreshing access token'))
                     return
                 }
 
-                logger.info('Got access token')
-                logger.debug(token)
+                this.logger.info('Got access token')
+                this.logger.debug(token)
                 resolve(token)
             })
         })
@@ -118,9 +117,9 @@ class GoogleDrive {
         let pageToken
         let counter = 1
 
-        logger.info('Getting full file list of keyword', q)
+        this.logger.info('Getting full file list of keyword', q)
         do {
-            logger.debug(`Getting page ${counter}`)
+            this.logger.debug(`Getting page ${counter}`)
             const params = {
                 driveId: this._data.drive.driveId,
                 corpora: 'drive',
@@ -138,7 +137,7 @@ class GoogleDrive {
                 return result
             }, {
                 onFailedAttempt: error => {
-                    logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+                    this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
                 },
                 retries: 3
             })
@@ -149,7 +148,7 @@ class GoogleDrive {
             counter++
         } while (pageToken)
 
-        logger.info(`Got ${data.length} files' metadatas`)
+        this.logger.info(`Got ${data.length} files' metadatas`)
         return data
     }
 
@@ -179,7 +178,7 @@ class GoogleDrive {
     async downloadFile (fileId) {
         if (!this.checkAuthorizationStatus()) return
 
-        logger.info('Downloading file', fileId)
+        this.logger.info('Downloading file', fileId)
 
         let res = await pRetry(async () => {
             const result = await this.driveClient.files.get({
@@ -196,7 +195,7 @@ class GoogleDrive {
             return result
         }, {
             onFailedAttempt: error => {
-                logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+                this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
             },
             retries: 3
         })
@@ -212,7 +211,7 @@ class GoogleDrive {
      */
     checkAuthorizationStatus () {
         if (!this.oAuth2Client || !this.driveClient) {
-            logger.error('Havn\'t authorize yet.')
+            this.logger.error('Havn\'t authorize yet.')
             return false
         }
 

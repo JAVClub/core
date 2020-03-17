@@ -1,7 +1,6 @@
 const config = require('./../../module/config')
 const file = require('./../../module/file')
 const video = require('./../../module/video')
-let logger
 
 class googleDrive {
     /**
@@ -11,10 +10,10 @@ class googleDrive {
     constructor (id, driver) {
         this.id = id
         this.client = driver
-        logger = require('./../../module/logger')('Importer: GD ' + id)
+        this.logger = require('./../../module/logger')('Importer: GD ' + id)
 
         if (!this.client) throw new Error('Invaild drive instance')
-        logger.info('Got drive instance')
+        this.logger.info('Got drive instance')
 
         const {
             default: PQueue
@@ -33,33 +32,33 @@ class googleDrive {
      * @returns {Promise} Promise queue
      */
     async run (full = false) {
-        logger.info('Starting process of import, full =', full)
+        this.logger.info('Starting process of import, full =', full)
 
         const fileList = await this.client.getFileList("name='info.json'", undefined, full)
-        logger.info('Got info.json file list')
+        this.logger.info('Got info.json file list')
 
         fileList.forEach((info) => {
             this.queue.add(() => {
                 return new Promise(async (resolve, reject) => {
-                    logger.debug('Handling info.json file', info.id)
+                    this.logger.debug('Handling info.json file', info.id)
 
                     let res = await this.client.downloadFile(info.id)
                     res = res.toString()
 
-                    logger.debug(`File ${info.id}'s content`, res)
+                    this.logger.debug(`File ${info.id}'s content`, res)
                     if (res && JSON.parse(res)) {
                         resolve(await this.handleInfoDotJSON(JSON.parse(res), info))
                         return
                     }
 
-                    logger.error('Invalid file of id', info.id, res)
+                    this.logger.error('Invalid file of id', info.id, res)
                     reject(res)
                 })
             })
         })
 
         const result = await this.queue.onEmpty().then(() => {
-            logger.info('All Promise settled')
+            this.logger.info('All Promise settled')
         })
 
         return result
@@ -75,15 +74,15 @@ class googleDrive {
      */
     async handleInfoDotJSON (info, fileInfo) {
         if (await video.isExistByHash(info.hash)) {
-            logger.debug(`Video ${info.hash} existed, skipped`)
+            this.logger.debug(`Video ${info.hash} existed, skipped`)
             return
         }
         const parent = fileInfo.parents[0]
 
-        logger.debug('Video folder id', parent)
+        this.logger.debug('Video folder id', parent)
 
         const fileList = await this.client.getFileList(`'${parent}' in parents`)
-        logger.debug('Video folder file list', fileList)
+        this.logger.debug('Video folder file list', fileList)
 
         let storyboardId, videoId
         for (const i in fileList) {
@@ -92,16 +91,16 @@ class googleDrive {
             if (item.name === 'storyboard') storyboardId = item.id
         }
 
-        logger.debug('Video id', videoId)
-        logger.debug('Storyboard folder id', storyboardId)
+        this.logger.debug('Video id', videoId)
+        this.logger.debug('Storyboard folder id', storyboardId)
 
         const storyboardList = await this.client.getFileList(`'${storyboardId}' in parents`)
         if (storyboardList.length !== 50 || !videoId) {
-            logger.info(`Video ${info.hash} havn't fully upload yet`)
+            this.logger.info(`Video ${info.hash} havn't fully upload yet`)
             return
         }
 
-        logger.info('Check pass')
+        this.logger.info('Check pass')
         const fileIds = await this.createFileRecord({
             videoId,
             storyboardList,
@@ -121,7 +120,7 @@ class googleDrive {
      * @returns {Object} file ids
      */
     async createFileRecord (data) {
-        logger.info('Creating file records')
+        this.logger.info('Creating file records')
         const fileIds = {
             metaId: 0,
             videoId: 0,
