@@ -74,6 +74,10 @@ class googleDrive {
      * @returns {Promise} Video create Promise
      */
     async handleInfoDotJSON (info, fileInfo) {
+        if (await video.isExistByHash(info.hash)) {
+            logger.debug(`Video ${info.hash} existed, skipped`)
+            return
+        }
         const parent = fileInfo.parents[0]
 
         logger.debug('Video folder id', parent)
@@ -101,11 +105,8 @@ class googleDrive {
         const fileIds = await this.createFileRecord({
             videoId,
             storyboardList,
-            info,
             fileInfo
         })
-
-        logger.debug('Files id', fileIds)
 
         const result = await video.createVideo(info, fileIds)
 
@@ -121,26 +122,31 @@ class googleDrive {
      */
     async createFileRecord (data) {
         logger.info('Creating file records')
-        const prefix = data.info.JAVID + '_'
         const fileIds = {
             metaId: 0,
             videoId: 0,
             storyboardId: {}
         }
 
-        fileIds.metaId = await file.createFileRecord(prefix + 'json', this.id, {
-            fileId: data.fileInfo.id
-        })
+        let storageDataList = [
+            JSON.stringify({fileId: data.fileInfo.id}),
+            JSON.stringify({fileId: data.videoId})
+        ]
 
-        fileIds.videoId = await file.createFileRecord(prefix + 'video', this.id, {
-            fileId: data.videoId
-        })
+        for (let i in data.storyboardList) {
+            let item = data.storyboardList[i]
+            storageDataList.push(JSON.stringify({fileId: item.id}))
+        }
 
-        for (const i in data.storyboardList) {
-            const item = data.storyboardList[i]
-            fileIds.storyboardId[i] = await file.createFileRecord(prefix + item.name, this.id, {
-                fileId: item.id
-            })
+        let result = await file.createFilesRecord(this.id, storageDataList)
+
+        fileIds.metaId = result[JSON.stringify({fileId: data.fileInfo.id})]
+
+        fileIds.videoId = result[JSON.stringify({fileId: data.videoId})]
+
+        for (let i in data.storyboardList) {
+            let item = data.storyboardList[i]
+            fileIds.storyboardId[i] = result[JSON.stringify({fileId: item.id})]
         }
 
         return fileIds

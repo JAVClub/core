@@ -137,6 +137,19 @@ class Video {
     }
 
     /**
+     * Check video status by meta hash
+     *
+     * @param {String} hash video meta hash
+     *
+     * @returns {Boolean}
+     */
+    async isExistByHash(hash) {
+        let result = await db('videos').whereRaw('JSON_EXTRACT(videoMetadata, \'$.hash\') = ?', hash).count()
+        if (result && result[0]['count(*)'] === 0) return false
+        return true
+    }
+
+    /**
      * Get video id by info.json file id
      *
      * @param {String} infoFileId
