@@ -1,4 +1,4 @@
-const stack = require('./../../module/stack')
+const config = require('./../../module/config')
 const file = require('./../../module/file')
 const video = require('./../../module/video')
 let logger
@@ -11,18 +11,17 @@ class googleDrive {
     constructor (id, driver) {
         this.id = id
         this.client = driver
+        logger = require('./../../module/logger')('Importer: GD ' + id)
 
         if (!this.client) throw new Error('Invaild drive instance')
         logger.info('Got drive instance')
-
-        logger = require('./../../module/logger')('Importer: GD ' + id)
 
         const {
             default: PQueue
         } = require('p-queue')
 
         this.queue = new PQueue({
-            concurrency: 8
+            concurrency: config.get('importer.settings.googleDrive.queueNum') || 3
         })
     }
 

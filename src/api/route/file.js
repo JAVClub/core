@@ -11,11 +11,9 @@ router.get('/getURL/:str', async (req, res) => {
     })
 
     let str = req.params.str
-    console.log(str)
     str= str.split(',')
     let arr = []
     for (let i in str) arr.push(parseInt(str[i]))
-    console.log(arr)
 
     let result = await file.getFilesURL(arr)
 

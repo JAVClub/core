@@ -1,6 +1,7 @@
 {
     "system": {
-        "logLevel": "info"
+        "logLevel": "info",
+        "port": 3000
     },
     "database": {
         "connectionLimit": 5,
@@ -8,5 +9,19 @@
         "user": "javclub",
         "password": "javclub",
         "database": "javclub"
+    },
+    "importer": {
+        "settings": {
+            "googleDrive": {
+                "queueNum": 5
+            }
+        },
+
+        "cron": [
+            {
+                "driveId": 1,
+                "interval": 3600
+            }
+        ]
     }
 }

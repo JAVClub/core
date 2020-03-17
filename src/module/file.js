@@ -53,7 +53,6 @@ class File {
             let item = result[i]
             let client = await stack.getInstance(item.driverId)
             let res = await client.getFileURL(JSON.parse(item.storageData))
-            console.log(res)
             url[item.id] = res
         }
 
