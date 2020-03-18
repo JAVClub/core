@@ -7,7 +7,6 @@ const GDImporter = require('./driver/googleDrive')
 let cron = config.get('importer.cron')
 logger.debug('Config:', cron)
 ;(async () => {
-    logger.debug('Config', cron)
     for (let i in cron) {
         let item = cron[i]
 
