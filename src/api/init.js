@@ -11,6 +11,7 @@ app.use(bodyParser.json())
 app.use(async (req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
     logger.debug(req.method.toUpperCase(), req.path)
+    req.uid = -1
     const path = '' + req.path
     if (req.cookies && req.cookies.token) {
         const token = req.cookies.token
@@ -20,18 +21,18 @@ app.use(async (req, res, next) => {
         }
     }
 
-    if (!path.startsWith('/api/auth')) {
-        if (req.uid) return next()
-
-        res.status(403).json({
-            code: -1,
-            msg: 'Access denied',
-            data: {}
-        })
+    if (path.startsWith('/api/auth')) {
+        next()
         return
     }
 
-    next()
+    if (req.uid > 0) return next()
+
+    res.status(403).json({
+        code: -1,
+        msg: 'Access denied',
+        data: {}
+    })
 })
 
 app.use('/api/auth', require('./route/auth'))
