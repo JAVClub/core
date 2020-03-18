@@ -20,7 +20,8 @@
         "cron": [
             {
                 "driveId": 1,
-                "interval": 3600
+                "interval": 36000000,
+                "doFull": true
             }
         ]
     }

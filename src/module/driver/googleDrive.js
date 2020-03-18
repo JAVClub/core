@@ -107,8 +107,7 @@ class GoogleDrive {
      *
      * @returns {Array} File list
      */
-    async getFileList (q, fields, full, orderBy) {
-        fields = fields || 'id, name, modifiedTime, parents, size'
+    async getFileList (q, fields, full, orderBy, pageSize) {
         full = full || false
 
         if (!this.checkAuthorizationStatus()) return
@@ -117,7 +116,7 @@ class GoogleDrive {
         let pageToken
         let counter = 1
 
-        this.logger.info('Getting full file list of keyword', q)
+        this.logger.info(`Getting ${(full) ? 'full ': ''}file list of keyword`, q)
         do {
             this.logger.debug(`Getting page ${counter}`)
             const params = {
@@ -125,10 +124,10 @@ class GoogleDrive {
                 corpora: 'drive',
                 includeItemsFromAllDrives: true,
                 supportsTeamDrives: true,
-                pageSize: 1000,
+                pageSize: pageSize || 1000,
                 orderBy: orderBy || 'modifiedTime desc',
                 q,
-                fields: 'nextPageToken, files(' + fields + ')'
+                fields: 'nextPageToken, files(' + (fields || 'id, name, modifiedTime, parents, size') + ')'
             }
             if (pageToken) params.pageToken = pageToken
             let res = await pRetry(async () => {

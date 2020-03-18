@@ -4,6 +4,7 @@ const parser = new (require('dom-parser'))()
 const logger = require('./logger')('Module: MetaData')
 const db = require('./database')
 const cache = require('./cache')
+const ignore = require('./ignore')
 
 class Metadata {
     /**
@@ -121,6 +122,7 @@ class Metadata {
 
                         if (!JAVinfo || !JAVinfo.tags.length || !JAVinfo.stars.length) {
                             logger.warn('Invalid info for', JAVinfo)
+                            await ignore.addIgnore(JAVID)
                             resolve(0)
                             return
                         }
@@ -184,10 +186,16 @@ class Metadata {
 
             return res
         }, {
-            onFailedAttempt: error => {
+            onFailedAttempt: async (error) => {
                 logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+
+                return new Promise((re) => {
+                    setTimeout(() => {
+                        re()
+                    }, 20000)
+                })
             },
-            retries: 3
+            retries: 5
         })
 
         logger.debug('Result length', result.length)

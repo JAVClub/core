@@ -1,6 +1,7 @@
 const config = require('./../../module/config')
 const file = require('./../../module/file')
 const video = require('./../../module/video')
+const ignore = require('./../../module/ignore')
 
 class googleDrive {
     /**
@@ -34,7 +35,7 @@ class googleDrive {
     async run (full = false) {
         this.logger.info('Starting process of import, full =', full)
 
-        const fileList = await this.client.getFileList("name='info.json'", undefined, full)
+        const fileList = await this.client.getFileList("name='info.json'", null, full, null, (full) ? null : 51)
         this.logger.info('Got info.json file list')
 
         fileList.forEach((info) => {
@@ -73,8 +74,18 @@ class googleDrive {
      * @returns {Promise} Video create Promise
      */
     async handleInfoDotJSON (info, fileInfo) {
+        if (!info.company || !info.id) {
+            this.logger.warn('Info invalid', info)
+            return
+        }
+        let JAVID = info.company + '-' + info.id
+        if (await ignore.checkIgnoreStatus(JAVID)) {
+            this.logger.info(`Metadata ${JAVID} invalid, skipped`)
+            return
+        }
+
         if (await video.isExistByHash(info.hash)) {
-            this.logger.debug(`Video ${info.hash} existed, skipped`)
+            this.logger.info(`Video ${info.hash} existed, skipped`)
             return
         }
         const parent = fileInfo.parents[0]
