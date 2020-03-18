@@ -1,6 +1,8 @@
 const db = require('./database')
 const logger = require('./logger')('Module: File')
 const stack = require('./stack')
+const config = require('./config')
+const randomInt = require('random-int');
 
 class File {
     /**
@@ -88,6 +90,13 @@ class File {
         }
 
         return url
+    }
+
+    getProxyPrefix() {
+        let proxyList = config.get('proxy')
+        if (!proxyList || proxyList.length < 1) return ''
+
+        return proxyList[randomInt(0, proxyList.length - 1)]
     }
 }
 

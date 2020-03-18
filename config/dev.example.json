@@ -24,5 +24,8 @@
                 "doFull": true
             }
         ]
-    }
+    },
+    "proxy": [
+        "https://proxy.xiaolin.in/"
+    ]
 }

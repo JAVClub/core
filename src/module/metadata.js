@@ -4,6 +4,7 @@ const parser = new (require('dom-parser'))()
 const logger = require('./logger')('Module: MetaData')
 const db = require('./database')
 const cache = require('./cache')
+const file = require('./file')
 const ignore = require('./ignore')
 
 class Metadata {
@@ -24,6 +25,7 @@ class Metadata {
 
         result = Object.assign({}, result)
         result.JAVID = result.companyName + '-' + result.companyId
+        result.posterFileURL = file.getProxyPrefix() + result.posterFileURL
 
         return Object.assign(result, await this.getMetaByMetadataId(id))
     }
@@ -53,6 +55,7 @@ class Metadata {
             let item = result[i]
             item = Object.assign({}, item)
             item.JAVID = item.companyName + '-' + item.companyId
+            item.posterFileURL = file.getProxyPrefix() + item.posterFileURL
             processed.push(Object.assign(item, await this.getMetaByMetadataId(item.id)))
         }
 
