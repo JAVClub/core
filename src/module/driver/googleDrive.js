@@ -135,10 +135,16 @@ class GoogleDrive {
 
                 return result
             }, {
-                onFailedAttempt: error => {
+                onFailedAttempt: async (error) => {
                     this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+
+                    return new Promise((re) => {
+                        setTimeout(() => {
+                            re()
+                        }, 20000)
+                    })
                 },
-                retries: 3
+                retries: 5
             })
             res = res.data
             if (res.nextPageToken && full) pageToken = res.nextPageToken
