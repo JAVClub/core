@@ -91,7 +91,7 @@ router.get('/getMetaList/:type/:page?/:size?', async (req, res) => {
 
     type = metadata._getTypeMapping(type).type
 
-    let result = await metadata.getMetaList(type, page, size)
+    const result = await metadata.getMetaList(type, page, size)
 
     res.json({
         code: 0,

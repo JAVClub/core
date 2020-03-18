@@ -192,9 +192,9 @@ class Metadata {
             onFailedAttempt: async (error) => {
                 logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
 
-                return new Promise((re) => {
+                return new Promise((resolve) => {
                     setTimeout(() => {
-                        re()
+                        resolve()
                     }, 20000)
                 })
             },
@@ -298,7 +298,7 @@ class Metadata {
 
         const processed = []
         for (const i in result) {
-            let item = result[i]
+            const item = result[i]
             processed.push(Object.assign({}, item))
         }
 

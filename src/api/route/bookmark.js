@@ -4,7 +4,7 @@ const router = express.Router()
 const bookmark = require('./../../module/bookmark')
 
 router.get('/getList', async (req, res) => {
-    let result = await bookmark.getUserBookmarkList(req.uid)
+    const result = await bookmark.getUserBookmarkList(req.uid)
 
     res.json({
         code: 0,
@@ -38,7 +38,7 @@ router.get('/getInfo/:bookmarkId/:page?/:size?', async (req, res) => {
         return
     }
 
-    let result = await bookmark.getBookmarkInfo(bookmarkId, false, page, size)
+    const result = await bookmark.getBookmarkInfo(bookmarkId, false, page, size)
 
     res.json({
         code: 0,
@@ -48,7 +48,7 @@ router.get('/getInfo/:bookmarkId/:page?/:size?', async (req, res) => {
 })
 
 router.post('/addMetadata/:bookmarkId', async (req, res) => {
-    let bookmarkId = parseInt(req.params.bookmarkId || 0)
+    const bookmarkId = parseInt(req.params.bookmarkId || 0)
 
     if (!await bookmark.isOwn(req.uid, bookmarkId)) {
         res.status(403).json({
@@ -59,7 +59,7 @@ router.post('/addMetadata/:bookmarkId', async (req, res) => {
         return
     }
 
-    let body = req.body
+    const body = req.body
     if (!body || !body.metadataId) {
         res.json({
             code: -2,
@@ -69,7 +69,7 @@ router.post('/addMetadata/:bookmarkId', async (req, res) => {
         return
     }
 
-    let result = await bookmark.addMetadata(bookmarkId, body.metadataId)
+    const result = await bookmark.addMetadata(bookmarkId, body.metadataId)
 
     res.json({
         code: 0,
@@ -78,11 +78,10 @@ router.post('/addMetadata/:bookmarkId', async (req, res) => {
             result: result
         }
     })
-
 })
 
 router.post('/createBookmark', async (req, res) => {
-    let body = req.body
+    const body = req.body
     if (!body || !body.name) {
         res.json({
             code: -2,
@@ -91,9 +90,9 @@ router.post('/createBookmark', async (req, res) => {
         })
         return
     }
-    let bookmarkName = body.name
+    const bookmarkName = body.name
 
-    let result = await bookmark.createBookmark(req.uid, bookmarkName)
+    const result = await bookmark.createBookmark(req.uid, bookmarkName)
 
     res.json({
         code: 0,
@@ -105,7 +104,7 @@ router.post('/createBookmark', async (req, res) => {
 })
 
 router.post('/removeBookmark', async (req, res) => {
-    let body = req.body
+    const body = req.body
     if (!body || !body.bookmarkId) {
         res.json({
             code: -2,
@@ -114,7 +113,7 @@ router.post('/removeBookmark', async (req, res) => {
         })
         return
     }
-    let bookmarkId = parseInt(body.bookmarkId) || 0
+    const bookmarkId = parseInt(body.bookmarkId) || 0
 
     if (!await bookmark.isOwn(req.uid, bookmarkId)) {
         res.status(403).json({
@@ -125,7 +124,7 @@ router.post('/removeBookmark', async (req, res) => {
         return
     }
 
-    let result = await bookmark.removeBookmark(bookmarkId)
+    const result = await bookmark.removeBookmark(bookmarkId)
 
     res.json({
         code: 0,
@@ -137,7 +136,7 @@ router.post('/removeBookmark', async (req, res) => {
 })
 
 router.post('/removeMetadata/:bookmarkId', async (req, res) => {
-    let bookmarkId = parseInt(req.params.bookmarkId || 0)
+    const bookmarkId = parseInt(req.params.bookmarkId || 0)
 
     if (!await bookmark.isOwn(req.uid, bookmarkId)) {
         res.status(403).json({
@@ -148,7 +147,7 @@ router.post('/removeMetadata/:bookmarkId', async (req, res) => {
         return
     }
 
-    let body = req.body
+    const body = req.body
     if (!body || !body.metadataId) {
         res.json({
             code: -2,
@@ -158,7 +157,7 @@ router.post('/removeMetadata/:bookmarkId', async (req, res) => {
         return
     }
 
-    let result = await bookmark.removeMetadata(bookmarkId, body.metadataId)
+    const result = await bookmark.removeMetadata(bookmarkId, body.metadataId)
 
     res.json({
         code: 0,
@@ -167,11 +166,10 @@ router.post('/removeMetadata/:bookmarkId', async (req, res) => {
             result: result
         }
     })
-
 })
 
 router.get('/getByMetadata/:metadataId', async (req, res) => {
-    let metadataId = parseInt(req.params.metadataId)
+    const metadataId = parseInt(req.params.metadataId)
 
     if (metadataId < 1) {
         res.json({
@@ -182,7 +180,7 @@ router.get('/getByMetadata/:metadataId', async (req, res) => {
         return
     }
 
-    let result = await bookmark.getBookmarkByMetadataId(req.uid, metadataId)
+    const result = await bookmark.getBookmarkByMetadataId(req.uid, metadataId)
 
     res.json({
         code: 0,

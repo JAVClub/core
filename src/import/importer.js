@@ -4,14 +4,14 @@ const config = require('./../module/config')
 const stack = require('./../module/stack')
 const GDImporter = require('./driver/googleDrive')
 
-let cron = config.get('importer.cron')
+const cron = config.get('importer.cron')
 logger.debug('Config:', cron)
 ;(async () => {
-    for (let i in cron) {
-        let item = cron[i]
+    for (const i in cron) {
+        const item = cron[i]
 
-        let instance = await stack.getInstance(item.driveId)
-        let importerClass = new GDImporter(item.driveId, instance)
+        const instance = await stack.getInstance(item.driveId)
+        const importerClass = new GDImporter(item.driveId, instance)
 
         const setCron = async () => {
             logger.debug(`[${item.driveId}] Cron set, ${item.interval}ms`)
@@ -24,7 +24,7 @@ logger.debug('Config:', cron)
         }
 
         setTimeout(async () => {
-            let doFull = (item.doFull) ? true : false
+            const doFull = !!(item.doFull)
             logger.debug(`[${item.driveId}] Starting first time import process`)
             await importerClass.run(doFull)
             logger.debug(`[${item.driveId}] First time import process fininshed`)

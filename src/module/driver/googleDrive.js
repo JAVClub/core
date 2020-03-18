@@ -116,7 +116,7 @@ class GoogleDrive {
         let pageToken
         let counter = 1
 
-        this.logger.info(`Getting ${(full) ? 'full ': ''}file list of keyword`, q)
+        this.logger.info(`Getting ${(full) ? 'full ' : ''}file list of keyword`, q)
         do {
             this.logger.debug(`Getting page ${counter}`)
             const params = {
@@ -140,15 +140,15 @@ class GoogleDrive {
                     onFailedAttempt: async (error) => {
                         this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
 
-                        return new Promise((re) => {
+                        return new Promise((resolve) => {
                             setTimeout(() => {
-                                re()
+                                resolve()
                             }, 20000)
                         })
                     },
                     retries: 5
                 })
-            } catch(error) {
+            } catch (error) {
                 this.logger.error('Error while getting dir list', q, error)
                 return []
             }
@@ -170,11 +170,11 @@ class GoogleDrive {
      *
      * @returns {String} URL
      */
-    async getFileURL(storageData) {
+    async getFileURL (storageData) {
         if (this._data.encryption && this._data.encryption.secret && this._data.encryption.server) {
-            let uri = cryptoJs.AES.encrypt(this._data.drive.driveId + '||!||' + storageData.fileId, this._data.encryption.secret).toString()
-            let server = this._data.encryption.server.split(',')
-            return server[randomInt(0, server.length - 1)] + '/' +  base64.encode(uri)
+            const uri = cryptoJs.AES.encrypt(this._data.drive.driveId + '||!||' + storageData.fileId, this._data.encryption.secret).toString()
+            const server = this._data.encryption.server.split(',')
+            return server[randomInt(0, server.length - 1)] + '/' + base64.encode(uri)
         }
         return ''
     }
@@ -211,15 +211,15 @@ class GoogleDrive {
                 onFailedAttempt: async (error) => {
                     this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
 
-                    return new Promise((re) => {
+                    return new Promise((resolve) => {
                         setTimeout(() => {
-                            re()
+                            resolve()
                         }, 20000)
                     })
                 },
                 retries: 5
             })
-        } catch(error) {
+        } catch (error) {
             this.logger.error('Error while downloading file', fileId, error)
             return []
         }

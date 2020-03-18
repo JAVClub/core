@@ -13,7 +13,7 @@ class User {
      * @returns {Int} username id
      */
     async createUser (name, password) {
-        let result = await db('users').insert({
+        const result = await db('users').insert({
             username: name,
             password: bcrypt.hashSync(password, bcrypt.genSaltSync()),
             token: randomString.generate(32),
@@ -33,7 +33,7 @@ class User {
      * @returns {String} token or empty string
      */
     async getTokenByUsernameAndPassword (username, password) {
-        let result = await db('users').where('username', username).select('*').first()
+        const result = await db('users').where('username', username).select('*').first()
 
         if (result && result.password) {
             if (bcrypt.compareSync(password, result.password)) {
@@ -54,8 +54,8 @@ class User {
      *
      * @returns {Int}
      */
-    async changeUsername(uid, newUsername) {
-        let result = await db('users').where('id', uid).update({
+    async changeUsername (uid, newUsername) {
+        const result = await db('users').where('id', uid).update({
             username: newUsername,
             lastSeen: (new Date()).getTime()
         })
@@ -71,10 +71,10 @@ class User {
      *
      * @returns {Int}
      */
-    async changePassword(uid, newPassword) {
-        let password = bcrypt.hashSync(newPassword, bcrypt.genSaltSync())
+    async changePassword (uid, newPassword) {
+        const password = bcrypt.hashSync(newPassword, bcrypt.genSaltSync())
 
-        let result = await db('users').where('id', uid).update({
+        const result = await db('users').where('id', uid).update({
             password: password,
             token: randomString.generate(32),
             lastSeen: (new Date()).getTime()
@@ -92,7 +92,7 @@ class User {
      */
     async verifyToken (token) {
         logger.debug('Checking token', token)
-        let result = await db('users').where('token', token).select('id').first()
+        const result = await db('users').where('token', token).select('id').first()
 
         if (result && result.id > 0) return result.id
 

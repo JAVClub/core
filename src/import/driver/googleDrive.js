@@ -78,7 +78,7 @@ class googleDrive {
             this.logger.warn('Info invalid', info)
             return
         }
-        let JAVID = info.company + '-' + info.id
+        const JAVID = info.company + '-' + info.id
         if (await ignore.checkIgnoreStatus(JAVID)) {
             this.logger.info(`Metadata ${JAVID} invalid, skipped`)
             return
@@ -138,25 +138,25 @@ class googleDrive {
             storyboardId: {}
         }
 
-        let storageDataList = [
-            JSON.stringify({fileId: data.fileInfo.id}),
-            JSON.stringify({fileId: data.videoId})
+        const storageDataList = [
+            JSON.stringify({ fileId: data.fileInfo.id }),
+            JSON.stringify({ fileId: data.videoId })
         ]
 
-        for (let i in data.storyboardList) {
-            let item = data.storyboardList[i]
-            storageDataList.push(JSON.stringify({fileId: item.id}))
+        for (const i in data.storyboardList) {
+            const item = data.storyboardList[i]
+            storageDataList.push(JSON.stringify({ fileId: item.id }))
         }
 
-        let result = await file.createFilesRecord(this.id, storageDataList)
+        const result = await file.createFilesRecord(this.id, storageDataList)
 
-        fileIds.metaId = result[JSON.stringify({fileId: data.fileInfo.id})]
+        fileIds.metaId = result[JSON.stringify({ fileId: data.fileInfo.id })]
 
-        fileIds.videoId = result[JSON.stringify({fileId: data.videoId})]
+        fileIds.videoId = result[JSON.stringify({ fileId: data.videoId })]
 
-        for (let i in data.storyboardList) {
-            let item = data.storyboardList[i]
-            fileIds.storyboardId[i] = result[JSON.stringify({fileId: item.id})]
+        for (const i in data.storyboardList) {
+            const item = data.storyboardList[i]
+            fileIds.storyboardId[i] = result[JSON.stringify({ fileId: item.id })]
         }
 
         return fileIds

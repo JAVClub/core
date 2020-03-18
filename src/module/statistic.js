@@ -1,8 +1,8 @@
 const db = require('./database')
 
 class Statistic {
-    async getData() {
-        let tableList = [
+    async getData () {
+        const tableList = [
             'drivers',
             'files',
             'metadatas',
@@ -12,9 +12,9 @@ class Statistic {
             'videos'
         ]
 
-        let result = {}
-        for (let i in tableList) {
-            let res = await db(tableList[i]).count()
+        const result = {}
+        for (const i in tableList) {
+            const res = await db(tableList[i]).count()
             result[tableList[i]] = res[0]['count(*)']
         }
 

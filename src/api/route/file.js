@@ -1,21 +1,22 @@
-const logger = require('./../../module/logger')('API: Metadata')
 const express = require('express')
 const router = express.Router()
 const file = require('./../../module/file')
 
 router.get('/getURL/:str', async (req, res) => {
-    if (!req.params.str) return res.json({
-        code: -2,
-        msg: 'Param error',
-        data: {}
-    })
+    if (!req.params.str) {
+        return res.json({
+            code: -2,
+            msg: 'Param error',
+            data: {}
+        })
+    }
 
     let str = req.params.str
-    str= str.split(',')
-    let arr = []
-    for (let i in str) arr.push(parseInt(str[i]))
+    str = str.split(',')
+    const arr = []
+    for (const i in str) arr.push(parseInt(str[i]))
 
-    let result = await file.getFilesURL(arr)
+    const result = await file.getFilesURL(arr)
 
     res.json({
         code: 0,

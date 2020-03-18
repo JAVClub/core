@@ -3,7 +3,7 @@ const router = express.Router()
 const statistic = require('../../module/statistic')
 
 router.get('/getData', async (req, res) => {
-    let result = await statistic.getData()
+    const result = await statistic.getData()
 
     res.json({
         code: 0,

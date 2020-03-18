@@ -32,7 +32,7 @@ class Bookmark {
      * @returns {Int} bookmark mapping id
      */
     async addMetadata (bookmarkId, metadataId) {
-        let num = await db('bookmarks_mapping').where('bookmarkId', bookmarkId).where('metadataId', metadataId).count()
+        const num = await db('bookmarks_mapping').where('bookmarkId', bookmarkId).where('metadataId', metadataId).count()
 
         if (num && num[0]['count(*)'] !== 0) return true
 
@@ -55,11 +55,13 @@ class Bookmark {
      *
      * @returns {Array} matedata id
      */
-    async getBookmarkInfo(id, onlyName = false, page = 1, size = 20) {
-        let bookmarkName = await db('bookmarks').where('id', id).select('*').first()
-        if (onlyName) return {
-            id: bookmarkName.id,
-            name: bookmarkName.name
+    async getBookmarkInfo (id, onlyName = false, page = 1, size = 20) {
+        const bookmarkName = await db('bookmarks').where('id', id).select('*').first()
+        if (onlyName) {
+            return {
+                id: bookmarkName.id,
+                name: bookmarkName.name
+            }
         }
         let metadatas = await db('bookmarks_mapping').where('bookmarkId', id).orderBy('id', 'desc').select('*').paginate({
             perPage: size,
@@ -69,10 +71,10 @@ class Bookmark {
         let total = await db('bookmarks_mapping').where('bookmarkId', id).count()
         total = total[0]['count(*)']
 
-        let processed = []
+        const processed = []
         metadatas = metadatas.data
-        for (let i in metadatas) {
-            let item = metadatas[i]
+        for (const i in metadatas) {
+            const item = metadatas[i]
             processed.push(await metadata.getMetadataById(item.metadataId))
         }
 
@@ -90,7 +92,7 @@ class Bookmark {
      *
      * @returns {Boolean} true
      */
-    async removeBookmark(id) {
+    async removeBookmark (id) {
         await db('bookmarks').where('id', id).delete()
         await db('bookmarks_mapping').where('bookmarkId', id).delete()
 
@@ -105,8 +107,8 @@ class Bookmark {
      *
      * @returns {Boolean}
      */
-    async removeMetadata(bookmarkId, metadataId) {
-        let result = await db('bookmarks_mapping').where('bookmarkId', bookmarkId).where('metadataId', metadataId).delete()
+    async removeMetadata (bookmarkId, metadataId) {
+        const result = await db('bookmarks_mapping').where('bookmarkId', bookmarkId).where('metadataId', metadataId).delete()
 
         if (result) return true
         return false
@@ -120,8 +122,8 @@ class Bookmark {
      *
      * @returns {Boolean}
      */
-    async isOwn(uid, bookmarkId) {
-        let result = await db('bookmarks').where('uid', uid).where('id', bookmarkId).count()
+    async isOwn (uid, bookmarkId) {
+        const result = await db('bookmarks').where('uid', uid).where('id', bookmarkId).count()
 
         if (result[0]['count(*)'] !== 0) return true
         return false
@@ -135,12 +137,12 @@ class Bookmark {
      *
      * @returns {Array} bookmark list
      */
-    async getUserBookmarkList(uid, onlyId = false) {
-        let result = await db('bookmarks').where('uid', uid).select('*')
+    async getUserBookmarkList (uid, onlyId = false) {
+        const result = await db('bookmarks').where('uid', uid).select('*')
 
-        let processed = []
-        for (let i in result) {
-            let item = result[i]
+        const processed = []
+        for (const i in result) {
+            const item = result[i]
             processed.push((onlyId) ? item.id : Object.assign({}, item))
         }
 
@@ -155,21 +157,21 @@ class Bookmark {
      *
      * @returns {Array} bookmark list
      */
-    async getBookmarkByMetadataId(uid, metadataId) {
-        let own = await this.getUserBookmarkList(uid, true)
-        let result = await db('bookmarks_mapping').where('metadataId', metadataId).select('*')
+    async getBookmarkByMetadataId (uid, metadataId) {
+        const own = await this.getUserBookmarkList(uid, true)
+        const result = await db('bookmarks_mapping').where('metadataId', metadataId).select('*')
 
         let processed = new Set()
-        for (let i in result) {
-            let item = result[i]
+        for (const i in result) {
+            const item = result[i]
             if (!own.includes(item.bookmarkId)) continue
             processed.add(item.bookmarkId)
         }
 
         processed = Array.from(processed)
-        let again = []
-        for (let i in processed) {
-            let res = await this.getBookmarkInfo(processed[i], true)
+        const again = []
+        for (const i in processed) {
+            const res = await this.getBookmarkInfo(processed[i], true)
             again.push(res)
         }
 
