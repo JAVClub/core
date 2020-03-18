@@ -130,22 +130,28 @@ class GoogleDrive {
                 fields: 'nextPageToken, files(' + (fields || 'id, name, modifiedTime, parents, size') + ')'
             }
             if (pageToken) params.pageToken = pageToken
-            let res = await pRetry(async () => {
-                const result = await this.driveClient.files.list(params)
+            let res
+            try {
+                res = await pRetry(async () => {
+                    const result = await this.driveClient.files.list(params)
 
-                return result
-            }, {
-                onFailedAttempt: async (error) => {
-                    this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+                    return result
+                }, {
+                    onFailedAttempt: async (error) => {
+                        this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
 
-                    return new Promise((re) => {
-                        setTimeout(() => {
-                            re()
-                        }, 20000)
-                    })
-                },
-                retries: 5
-            })
+                        return new Promise((re) => {
+                            setTimeout(() => {
+                                re()
+                            }, 20000)
+                        })
+                    },
+                    retries: 5
+                })
+            } catch(error) {
+                this.logger.error('Error while getting dir list', q, error)
+                return []
+            }
             res = res.data
             if (res.nextPageToken && full) pageToken = res.nextPageToken
             else pageToken = null
@@ -185,25 +191,38 @@ class GoogleDrive {
 
         this.logger.info('Downloading file', fileId)
 
-        let res = await pRetry(async () => {
-            const result = await this.driveClient.files.get({
-                corpora: 'drive',
-                includeItemsFromAllDrives: true,
-                supportsTeamDrives: true,
-                driveId: this._data.drive.driveId,
-                alt: 'media',
-                fileId
-            }, {
-                responseType: 'arraybuffer'
-            })
+        let res
 
-            return result
-        }, {
-            onFailedAttempt: error => {
-                this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
-            },
-            retries: 3
-        })
+        try {
+            res = await pRetry(async () => {
+                const result = await this.driveClient.files.get({
+                    corpora: 'drive',
+                    includeItemsFromAllDrives: true,
+                    supportsTeamDrives: true,
+                    driveId: this._data.drive.driveId,
+                    alt: 'media',
+                    fileId
+                }, {
+                    responseType: 'arraybuffer'
+                })
+
+                return result
+            }, {
+                onFailedAttempt: async (error) => {
+                    this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+
+                    return new Promise((re) => {
+                        setTimeout(() => {
+                            re()
+                        }, 20000)
+                    })
+                },
+                retries: 5
+            })
+        } catch(error) {
+            this.logger.error('Error while downloading file', fileId, error)
+            return []
+        }
 
         res = Buffer.from(res.data, 'binary')
         return res
