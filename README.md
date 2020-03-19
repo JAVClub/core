@@ -278,7 +278,7 @@ npm i
 core 中的数据来源是 fetcher 上传至 Google Drive 中的数据, 请在使用前 1-2 天部署好 fetcher 以获取足够的数据
 
 **使用前准备:**
-- 向数据库中 `drivers` 表中插入数据, 参考如下, 替换其中以 `【】` 包裹的内容即可 (目前仅支持 Google Drive)
+- 向数据库中 `drivers` 表中插入数据, 参考如下, 替换其中以 `【】` 包裹的内容即可 (目前仅支持 Google Drive) (【your_gd_proxy_server_here】的内容请参考 [workers](https://github.com/JAVClub/workers), 需要 `https://` 以及 `/`, 多个地址请用 `,` 分割)
   ```sql
   INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `createTime`, `updateTime`) VALUES
   (1, '1', 'gd', '{\"oAuth\":{\"client_id\":\"【your_client_here】\",\"client_secret\":\"【your_client_secret_here】\",\"redirect_uri\":\"urn:ietf:wg:oauth:2.0:oob\",\"token\":{\"access_token\":\"【your_access_token_here_optional】\",\"refresh_token\":\"【your_refresh_token_here】\",\"scope\":\"https://www.googleapis.com/auth/drive\",\"token_type\":\"Bearer\",\"expiry_date\":1583679345619}},\"drive\":{\"driveId\":\"【your_drive_or_folder_id_here】\"},\"encryption\":{\"secret\":\"【path_ase_secret】\",\"server\":\"【your_gd_proxy_server_here】"}}', 1, '【timestanp_in_ms_here】', '【timestanp_in_ms_here】');
