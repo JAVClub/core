@@ -24,7 +24,7 @@
   "dependencies": {
     "bcrypt": "^4.0.1",
     "config": "^3.3.0",
-    "cookie-parser": "^1.4.4",
+    "cookie-parser": "^1.4.5",
     "crypto-js": "^4.0.0",
     "dom-parser": "^0.1.6",
     "express": "^4.17.1",
@@ -42,10 +42,11 @@
     "promise-queue-plus": "^1.2.2",
     "random-int": "^2.0.1",
     "randomstring": "^1.1.5",
-    "sha256": "^0.2.0"
+    "sha256": "^0.2.0",
+    "minimist": ">=1.2.2"
   },
   "devDependencies": {
-    "standard": "^14.3.1",
+    "standard": "^14.3.3",
     "standardx": "^5.0.0"
   }
 }
