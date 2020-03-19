@@ -1,4 +1,17 @@
-# JAVClub
+<h1 align="center">
+  <img src="https://github.com/JAVClub/core/raw/master/docs/logo.png" alt="JAVClub" width="200">
+  <br>JAVClub<br>
+</h1>
+
+## Features
+
+- 支持在线播放
+- 全自动爬取、下载、上传、处理
+- 视频、图片数据不占用本地空间
+- 代理后速度播放速度可观, 不代理亦可看
+- 多用户系统, 可以与的好基友一起穿越 (不是
+- 支持收藏夹
+- 面熟的话可以直接白嫖 (逃
 
 ## 简介
 
