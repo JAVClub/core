@@ -5,7 +5,6 @@ const user = require('./../../module/user')
 
 router.post('/login', async (req, res) => {
     const body = req.body
-    logger.debug('Request body:', body)
     if (body && body.username && body.password) {
         const result = await user.getTokenByUsernameAndPassword(body.username, body.password)
 
