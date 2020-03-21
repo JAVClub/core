@@ -17,7 +17,7 @@ class Metadata {
      */
     async getMetadataById (id) {
         logger.debug('Get metadata info, id', id)
-        let result = await cache(`metadataInfo_id_${id}`, async () => {
+        let result = await cache(`metadataInfo_${id}`, async () => {
             const res = await db('metadatas').where('id', id).select('*').first()
             return res
         }, 600000)
@@ -40,10 +40,13 @@ class Metadata {
      * @returns {Array} metadata list
      */
     async getMetadataList (page, size) {
-        let result = await db('metadatas').orderBy('id', 'desc').select('*').paginate({
-            perPage: size,
-            currentPage: page
-        })
+        let result = await cache(`metadataList_${page}_${size}`, async () => {
+            const res = await db('metadatas').orderBy('releaseDate', 'desc').select('*').paginate({
+                perPage: size,
+                currentPage: page
+            })
+            return res
+        }, 5000)
 
         let total = await db('metadatas').count()
         total = total[0]['count(*)']
@@ -79,10 +82,13 @@ class Metadata {
     async getMetadataListByMetaId (type, metaId, page, size) {
         const mapping = this._getTypeMapping(type)
 
-        let result = await db(`${mapping.type}_mapping`).where(mapping.column, metaId).orderBy('id', 'desc').select('metadataId').paginate({
-            perPage: size,
-            currentPage: page
-        })
+        let result = await cache(`metadataListByMeta_${type}_${metaId}_${page}_${size}`, async () => {
+            const res = await db(`${mapping.type}_mapping`).where(mapping.column, metaId).orderBy('id', 'desc').select('metadataId').paginate({
+                perPage: size,
+                currentPage: page
+            })
+            return res
+        }, 5000)
 
         let total = await db(`${mapping.type}_mapping`).where(mapping.column, metaId).count()
         total = total[0]['count(*)']
@@ -286,10 +292,13 @@ class Metadata {
      * @returns {Array} meta list
      */
     async getMetaList (type, page, size) {
-        let result = await db(type).select('*').paginate({
-            perPage: size,
-            currentPage: page
-        })
+        let result = await cache(`metaList_${type}_${page}_${size}`, async () => {
+            const res = await db(type).select('*').paginate({
+                perPage: size,
+                currentPage: page
+            })
+            return res
+        }, 5000)
 
         let total = await db(type).count()
         total = total[0]['count(*)']
