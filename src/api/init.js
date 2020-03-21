@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser')
 const user = require('./../module/user')
 const config = require('./../module/config')
 
+const pathPrefix = config.get('system.path') || '/api'
+
 app.use(cookieParser())
 app.use(bodyParser.json())
 
@@ -37,7 +39,7 @@ app.use(async (req, res, next) => {
 
     logger.debug(`[UID: ${req.uid}]`, req.method.toUpperCase(), req.path)
 
-    if (path.startsWith('/api/auth') || req.uid > 0) return next()
+    if (path.startsWith(pathPrefix + '/auth') || req.uid > 0) return next()
 
     res.status(403).json({
         code: -1,
@@ -46,13 +48,13 @@ app.use(async (req, res, next) => {
     })
 })
 
-app.use('/api/auth', require('./route/auth'))
-app.use('/api/video', require('./route/video'))
-app.use('/api/metadata', require('./route/metadata'))
-app.use('/api/bookmark', require('./route/bookmark'))
-app.use('/api/file', require('./route/file'))
-app.use('/api/statistic', require('./route/statistic'))
-app.use('/api/user', require('./route/user'))
+app.use(pathPrefix + '/auth', require('./route/auth'))
+app.use(pathPrefix + '/video', require('./route/video'))
+app.use(pathPrefix + '/metadata', require('./route/metadata'))
+app.use(pathPrefix + '/bookmark', require('./route/bookmark'))
+app.use(pathPrefix + '/file', require('./route/file'))
+app.use(pathPrefix + '/statistic', require('./route/statistic'))
+app.use(pathPrefix + '/user', require('./route/user'))
 
 app.all('*', (req, res) => {
     res.status(404).json({

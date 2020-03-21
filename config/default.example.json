@@ -2,6 +2,7 @@
     "system": {
         "logLevel": "info",
         "port": 3000,
+        "path": "/api",
         "allowChangeUsername": false,
         "userMaxBookmarkNum": 10,
         "userMaxBookmarkItemNum": 100,
