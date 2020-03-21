@@ -4,7 +4,10 @@
         "port": 3000,
         "allowChangeUsername": false,
         "userMaxBookmarkNum": 10,
-        "userMaxBookmarkItemNum": 100
+        "userMaxBookmarkItemNum": 100,
+        "corsDomain": [
+            "https://yourdomain.com"
+        ]
     },
     "database": {
         "connectionLimit": 5,

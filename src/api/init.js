@@ -8,6 +8,21 @@ const config = require('./../module/config')
 
 app.use(cookieParser())
 app.use(bodyParser.json())
+
+app.use((req, res, next) => {
+    const whitelist = config.get('system.corsDomain') || []
+    const origin = req.headers.origin || ''
+
+    if (whitelist.indexOf(origin) > -1) {
+        res.setHeader('Access-Control-Allow-Origin', origin)
+        res.setHeader('Access-Control-Allow-Methods', '*')
+        res.setHeader('Access-Control-Allow-Headers', '*')
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+    }
+
+    next()
+})
+
 app.use(async (req, res, next) => {
     req.uid = -1
 
