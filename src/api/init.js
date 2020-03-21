@@ -9,7 +9,6 @@ const config = require('./../module/config')
 app.use(cookieParser())
 app.use(bodyParser.json())
 app.use(async (req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*')
     req.uid = -1
 
     const path = '' + req.path
