@@ -18,7 +18,8 @@ class Metadata {
     async getMetadataById (id) {
         logger.debug('Get metadata info, id', id)
         let result = await cache(`metadataInfo_id_${id}`, async () => {
-            return await db('metadatas').where('id', id).select('*').first()
+            const res = await db('metadatas').where('id', id).select('*').first()
+            return res
         }, 600000)
 
         if (!result) return null
@@ -394,7 +395,8 @@ class Metadata {
      */
     async getMetaInfoByMetaId (type, id) {
         const result = await cache(`getMeta_${type}_${id}`, async () => {
-            return await db(type).where('id', id).select('*').first()
+            const res = await db(type).where('id', id).select('*').first()
+            return res
         })
 
         if (!result) return null

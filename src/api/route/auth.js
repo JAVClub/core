@@ -1,4 +1,3 @@
-const logger = require('./../../module/logger')('API: Auth')
 const express = require('express')
 const router = express.Router()
 const user = require('./../../module/user')

@@ -20,7 +20,7 @@ class Video {
             id: result.id,
             metadataId: result.metadataId,
             videoFileId: result.videoFileId,
-            isHiden: (item.isHiden === 1),
+            isHiden: (result.isHiden === 1),
             infoFileId: result.infoFileId,
             videoMetadata: JSON.parse(result.videoMetadata),
             storyboardFileIdSet: JSON.parse(result.storyboardFileIdSet),

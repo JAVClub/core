@@ -10,8 +10,8 @@ app.use(cookieParser())
 app.use(bodyParser.json())
 app.use(async (req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
-    logger.debug(req.method.toUpperCase(), req.path)
     req.uid = -1
+
     const path = '' + req.path
     if (req.cookies && req.cookies.token) {
         const token = req.cookies.token
@@ -21,12 +21,9 @@ app.use(async (req, res, next) => {
         }
     }
 
-    if (path.startsWith('/api/auth')) {
-        next()
-        return
-    }
+    logger.debug(`[UID: ${req.uid}]`, req.method.toUpperCase(), req.path)
 
-    if (req.uid > 0) return next()
+    if (path.startsWith('/api/auth') || req.uid > 0) return next()
 
     res.status(403).json({
         code: -1,
@@ -51,4 +48,6 @@ app.all('*', (req, res) => {
     })
 })
 
-app.listen(config.get('system.port'), () => console.log(`JAVClub core is listening on port ${config.get('system.port')}!`))
+app.listen(config.get('system.port'), () => {
+    logger.info(`JAVClub core is listening on port ${config.get('system.port')}!`)
+})
