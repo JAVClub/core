@@ -72,7 +72,10 @@
 {
     "system": {
         "logLevel": "debug",
-        "port": 3000
+        "port": 3000,
+        "allowChangeUsername": false,
+        "userMaxBookmarkNum": 10,
+        "userMaxBookmarkItemNum": 100
     },
     "database": {
         "connectionLimit": 5,
