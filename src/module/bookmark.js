@@ -86,6 +86,32 @@ class Bookmark {
     }
 
     /**
+     * Get number of user's bookmarks
+     *
+     * @param {Int} uid user id
+     */
+    async getBookmarkNumByUserId (uid) {
+        const result = await db('bookmarks').where('uid', uid).count()
+
+        if (result || result[0]) return result[0]['count(*)']
+        return result
+    }
+
+    /**
+     * Get number of bookmark's items
+     *
+     * @param {Int} bookmarkId bookmark id
+     *
+     * @returns {Int}
+     */
+    async getBookmarkInfoNum (bookmarkId) {
+        const result = await db('bookmarks_mapping').where('bookmarkId', bookmarkId).count()
+
+        if (result || result[0]) return result[0]['count(*)']
+        return 100
+    }
+
+    /**
      * Remove bookmark
      *
      * @param {Int} id bookmark id

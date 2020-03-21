@@ -1,6 +1,7 @@
 const logger = require('./../../module/logger')('API: Bookmark')
 const express = require('express')
 const router = express.Router()
+const config = require('./../../module/config')
 const bookmark = require('./../../module/bookmark')
 
 router.get('/getList', async (req, res) => {
@@ -69,6 +70,16 @@ router.post('/addMetadata/:bookmarkId', async (req, res) => {
         return
     }
 
+    const maxNum = config.get('system.userMaxBookmarkItemNum') || 100
+    if (await bookmark.getBookmarkInfoNum(bookmarkId) >= maxNum) {
+        res.json({
+            code: -2,
+            msg: `You have reached a limit of ${maxNum} items in a single bookmark`,
+            data: {}
+        })
+        return
+    }
+
     const result = await bookmark.addMetadata(bookmarkId, body.metadataId)
 
     res.json({
@@ -91,6 +102,16 @@ router.post('/createBookmark', async (req, res) => {
         return
     }
     const bookmarkName = body.name
+
+    const maxNum = config.get('system.userMaxBookmarkNum') || 10
+    if (await bookmark.getBookmarkNumByUserId(req.uid) >= maxNum) {
+        res.json({
+            code: -2,
+            msg: `You have reached a limit of ${maxNum} bookmarks for a single user`,
+            data: {}
+        })
+        return
+    }
 
     const result = await bookmark.createBookmark(req.uid, bookmarkName)
 
