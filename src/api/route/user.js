@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const user = require('../../module/user')
+const config = require('./../../module/config')
+const user = require('./../../module/user')
 
 router.post('/changeUsername', async (req, res) => {
     const body = req.body
@@ -8,6 +9,17 @@ router.post('/changeUsername', async (req, res) => {
         res.json({
             code: -2,
             msg: 'Param error',
+            data: {}
+        })
+        return
+    }
+
+    const allow = config.get('system.allowChangeUsername') || false
+
+    if (allow === false) {
+        res.json({
+            code: -2,
+            msg: 'Your can\'t change your username now due to the policy of the site owner',
             data: {}
         })
         return
