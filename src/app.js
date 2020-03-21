@@ -1,2 +1,2 @@
 require('./api/init')
-require('./import/importer')
+require('./import/init')
