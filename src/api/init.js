@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser')
 const user = require('./../module/user')
 const config = require('./../module/config')
 
-const pathPrefix = config.get('system.path') || '/api'
+const pathPrefix = config.get('system.path')
 
 app.use(cookieParser())
 app.use(bodyParser.json())
