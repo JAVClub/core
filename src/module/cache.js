@@ -5,7 +5,7 @@ setInterval(() => {
     for (const i in cachePool) {
         const item = cachePool[i]
 
-        if (item && item.expireTime < (new Date()).getTime()) {
+        if (item && item.expireTime !== 0 && item.expireTime < (new Date()).getTime()) {
             delete cachePool[i]
             logger.debug(`Expired cache ${i} cleared`)
         }
