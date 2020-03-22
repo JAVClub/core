@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const user = require('./../module/user')
 const config = require('./../module/config')
+const cache = require('./../module/cache')
 
 const pathPrefix = config.get('system.path')
 
@@ -31,7 +32,10 @@ app.use(async (req, res, next) => {
     const path = '' + req.path
     if (req.cookies && req.cookies.token) {
         const token = req.cookies.token
-        const uid = await user.verifyToken(token)
+        const uid = await cache(`api_checktoken_${token}`, async () => {
+            const res = await user.verifyToken(token)
+            return res
+        }, 60000)
         if (uid > 0) {
             req.uid = uid
         }

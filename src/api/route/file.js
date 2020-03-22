@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const cache = require('./../../module/cache')
 const file = require('./../../module/file')
 
 router.get('/getURL/:str', async (req, res) => {
@@ -16,7 +17,10 @@ router.get('/getURL/:str', async (req, res) => {
     const arr = []
     for (const i in str) arr.push(parseInt(str[i]))
 
-    const result = await file.getFilesURL(arr)
+    const result = await cache(`api_file_get_${str}`, async () => {
+        const res = await file.getFilesURL(arr)
+        return res
+    })
 
     res.json({
         code: 0,

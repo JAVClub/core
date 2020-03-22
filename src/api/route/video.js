@@ -1,6 +1,7 @@
 const logger = require('./../../module/logger')('API: Video')
 const express = require('express')
 const router = express.Router()
+const cache = require('./../../module/cache')
 const video = require('./../../module/video')
 
 router.get('/getList/:metadataId/:page?/:size?', async (req, res) => {
@@ -19,7 +20,10 @@ router.get('/getList/:metadataId/:page?/:size?', async (req, res) => {
         return
     }
 
-    const result = await video.getVideoList(page, size, false, metadataId)
+    const result = await cache(`api_video_list_${metadataId}_${page}_${size}`, async () => {
+        const res = await video.getVideoList(page, size, false, metadataId)
+        return res
+    }, 60000)
 
     res.json({
         code: 0,

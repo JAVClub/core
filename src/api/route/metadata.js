@@ -1,6 +1,7 @@
 const logger = require('./../../module/logger')('API: Metadata')
 const express = require('express')
 const router = express.Router()
+const cache = require('../../module/cache')
 const metadata = require('./../../module/metadata')
 
 router.get('/getInfo/:metadataId', async (req, res) => {
@@ -17,7 +18,10 @@ router.get('/getInfo/:metadataId', async (req, res) => {
         return
     }
 
-    const result = await metadata.getMetadataById(metadataId)
+    const result = await cache(`api_metadata_info_${metadataId}`, async () => {
+        const res = await metadata.getMetadataById(metadataId)
+        return res
+    }, 60000)
 
     res.json({
         code: 0,
@@ -41,7 +45,10 @@ router.get('/getList/:page?/:size?', async (req, res) => {
         return
     }
 
-    const result = await metadata.getMetadataList(page, size)
+    const result = await cache(`api_metadata_list_${page}_${size}`, async () => {
+        const res = await metadata.getMetadataList(page, size)
+        return res
+    }, 60000)
 
     res.json({
         code: 0,
@@ -65,7 +72,10 @@ router.get('/getListByMeta/:type/:metaId/:page?/:size?', async (req, res) => {
         return
     }
 
-    const result = await metadata.getMetadataListByMetaId(type, metaId, page, size)
+    const result = await cache(`api_metadata_listbymeta_${metaId}_${page}_${size}`, async () => {
+        const res = await metadata.getMetadataListByMetaId(type, metaId, page, size)
+        return res
+    }, 60000)
 
     res.json({
         code: 0,
@@ -91,7 +101,10 @@ router.get('/getMetaList/:type/:page?/:size?', async (req, res) => {
 
     type = metadata._getTypeMapping(type).type
 
-    const result = await metadata.getMetaList(type, page, size)
+    const result = await cache(`api_meta_list_${type}_${page}_${size}`, async () => {
+        const res = await metadata.getMetaList(type, page, size)
+        return res
+    }, 60000)
 
     res.json({
         code: 0,
