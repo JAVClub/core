@@ -12,7 +12,7 @@ class GoogleDrive {
      * @param {Object=} data
      */
     constructor (id, data = {}) {
-        this.logger = require('../logger')(`Driver[${id}]: Google Drive`)
+        this.logger = require('./../logger')(`Driver[${id}]: Google Drive`)
         if (data.oAuth) {
             this.oAuth2Client = new google.auth.OAuth2(data.oAuth.client_id, data.oAuth.client_secret, data.oAuth.redirect_uri)
             this.oAuth2Client.setCredentials(data.oAuth.token)

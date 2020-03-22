@@ -1,7 +1,7 @@
 const logger = require('./../../module/logger')('API: Metadata')
 const express = require('express')
 const router = express.Router()
-const cache = require('../../module/cache')
+const cache = require('./../../module/cache')
 const metadata = require('./../../module/metadata')
 
 router.get('/getInfo/:metadataId', async (req, res) => {

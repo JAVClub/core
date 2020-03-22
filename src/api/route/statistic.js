@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const cache = require('../../module/cache')
-const statistic = require('../../module/statistic')
+const cache = require('./../../module/cache')
+const statistic = require('./../../module/statistic')
 
 router.get('/getData', async (req, res) => {
     const result = await cache('api_statistic', async () => {
