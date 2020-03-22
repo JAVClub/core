@@ -11,7 +11,7 @@
 - 代理后速度播放速度可观, 不代理亦可看
 - 多用户系统, 可以与的好基友一起穿越 (不是
 - 支持收藏夹
-- 面熟的话可以直接白嫖 (逃 -> [Google Form](https://forms.gle/SphJGNRxbjjhf4bU8)
+- ~~面熟的话可以直接白嫖~~白嫖 (逃 -> [Google Form](https://forms.gle/SphJGNRxbjjhf4bU8)
 
 ## 简介
 
