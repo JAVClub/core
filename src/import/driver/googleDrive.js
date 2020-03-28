@@ -74,11 +74,14 @@ class googleDrive {
      * @returns {Promise} Video create Promise
      */
     async handleInfoDotJSON (info, fileInfo) {
-        if (!info.company || !info.id) {
+        if (!info.JAVID && (!info.company || !info.id)) {
             this.logger.warn('Info invalid', info)
             return
         }
-        const JAVID = info.company + '-' + info.id
+        const JAVID = info.JAVID || (info.company + '-' + info.id)
+        const version = parseInt(info.version || 1)
+
+        this.logger.debug(`${JAVID} info.json file version:`, version)
         if (await ignore.checkIgnoreStatus(JAVID)) {
             this.logger.info(`Metadata ${JAVID} invalid, skipped`)
             return
@@ -103,12 +106,16 @@ class googleDrive {
         }
 
         this.logger.debug('Video id', videoId)
-        this.logger.debug('Storyboard folder id', storyboardId)
 
-        const storyboardList = await this.client.getFileList(`'${storyboardId}' in parents`)
-        if (storyboardList.length !== 50 || !videoId) {
-            this.logger.info(`Video ${info.hash} havn't fully upload yet`)
-            return
+        let storyboardList = []
+        if (version === 1) {
+            this.logger.debug('Storyboard folder id', storyboardId)
+
+            storyboardList = await this.client.getFileList(`'${storyboardId}' in parents`)
+            if (storyboardList.length !== 50 || !videoId) {
+                this.logger.info(`Video ${info.hash} havn't fully upload yet`)
+                return
+            }
         }
 
         this.logger.info('Check pass')
@@ -116,9 +123,9 @@ class googleDrive {
             videoId,
             storyboardList,
             fileInfo
-        })
+        }, version)
 
-        const result = await video.createVideo(info, fileIds)
+        const result = await video.createVideo(info, fileIds, version)
 
         return result
     }
@@ -130,7 +137,7 @@ class googleDrive {
      *
      * @returns {Object} file ids
      */
-    async createFileRecord (data) {
+    async createFileRecord (data, version = 1) {
         this.logger.info('Creating file records')
         const fileIds = {
             metaId: 0,
@@ -143,9 +150,11 @@ class googleDrive {
             JSON.stringify({ fileId: data.videoId })
         ]
 
-        for (const i in data.storyboardList) {
-            const item = data.storyboardList[i]
-            storageDataList.push(JSON.stringify({ fileId: item.id }))
+        if (version === 1) {
+            for (const i in data.storyboardList) {
+                const item = data.storyboardList[i]
+                storageDataList.push(JSON.stringify({ fileId: item.id }))
+            }
         }
 
         const result = await file.createFilesRecord(this.id, storageDataList)
@@ -154,9 +163,11 @@ class googleDrive {
 
         fileIds.videoId = result[JSON.stringify({ fileId: data.videoId })]
 
-        for (const i in data.storyboardList) {
-            const item = data.storyboardList[i]
-            fileIds.storyboardId[i] = result[JSON.stringify({ fileId: item.id })]
+        if (version === 1) {
+            for (const i in data.storyboardList) {
+                const item = data.storyboardList[i]
+                fileIds.storyboardId[i] = result[JSON.stringify({ fileId: item.id })]
+            }
         }
 
         return fileIds

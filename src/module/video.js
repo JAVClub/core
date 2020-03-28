@@ -24,6 +24,7 @@ class Video {
             infoFileId: result.infoFileId,
             videoMetadata: JSON.parse(result.videoMetadata),
             storyboardFileIdSet: JSON.parse(result.storyboardFileIdSet),
+            version: parseInt(result.version) || 1,
             updateTime: result.updateTime
         }
     }
@@ -61,7 +62,8 @@ class Video {
                 isHiden: (item.isHiden === 1),
                 infoFileId: item.infoFileId,
                 videoMetadata: JSON.parse(item.videoMetadata),
-                storyboardFileIdSet: JSON.parse(item.storyboardFileIdSet),
+                storyboardFileIdSet: JSON.parse(item.storyboardFileIdSet || '[]'),
+                version: parseInt(item.version) || 1,
                 updateTime: item.updateTime
             })
         }
@@ -104,33 +106,36 @@ class Video {
      *
      * @returns {Int} Video id
      */
-    async createVideo (info, fileIds) {
-        const JAVID = info.company + '-' + info.id
+    async createVideo (info, fileIds, version = 1) {
+        const JAVID = info.JAVID || (info.company + '-' + info.id)
 
-        let result = await db('videos').whereRaw('JSON_EXTRACT(videoMetadata, \'$.hash\') = ?', info.hash).select('id').first()
-        logger.debug('JAV hash', info.hash, result)
-
-        if (result && result.id) {
-            logger.info('Duplicate video exist, skipped', result)
-            return result.id
-        }
-
-        const metaId = await metadata.getMetadataId(JAVID)
+        const metadataId = await metadata.getMetadataId(JAVID, version, info.JAVMetadata)
         logger.debug('Metadata id', metaId)
 
-        if (metaId === 0) {
+        if (metadataId === 0) {
             return
         }
 
-        result = await db('videos').insert({
+        if (info.JAVMetadata) {
+            delete info.JAVMetadata
+            info.metadata = info.videoMetadata
+            delete info.videoMetadata
+        }
+
+        const dbData = {
             videoMetadata: JSON.stringify(info),
             isHiden: 0,
             videoFileId: fileIds.videoId,
-            metadataId: metaId,
-            storyboardFileIdSet: JSON.stringify(fileIds.storyboardId),
+            metadataId: metadataId,
             infoFileId: fileIds.metaId,
-            updateTime: (new Date()).getTime()
-        }).select('id')
+            updateTime: (new Date()).getTime(),
+            version
+        }
+
+        if (version === 1) dbData.storyboardFileIdSet = JSON.stringify(fileIds.storyboardId)
+        else dbData.storyboardFileIdSet = '[]'
+
+        result = await db('videos').insert(dbData).select('id')
 
         logger.info(`[${JAVID}] Video created, id`, result[0])
         return result[0]

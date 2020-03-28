@@ -18,12 +18,19 @@ class Metadata {
     async getMetadataById (id) {
         logger.debug('Get metadata info, id', id)
         let result = await db('metadatas').where('id', id).select('*').first()
+        logger.debug('Got result', result)
 
         if (!result) return null
 
         result = Object.assign({}, result)
-        result.JAVID = result.companyName + '-' + result.companyId
+        result.JAVID = (`${result.JAVID}`.indexOf('-') !== -1) ? result.JAVID : (result.companyName + '-' + result.companyId)
         result.posterFileURL = file.getProxyPrefix() + result.posterFileURL
+        if (result.version === 2) {
+            result.screenshotFilesURL = JSON.parse(result.screenshotFilesURL)
+            for (const i in result.screenshotFilesURL) {
+                result.screenshotFilesURL[i] = file.getProxyPrefix() + result.screenshotFilesURL[i]
+            }
+        }
 
         return Object.assign(result, await this.getMetaByMetadataId(id))
     }
@@ -52,8 +59,17 @@ class Metadata {
         for (const i in result) {
             let item = result[i]
             item = Object.assign({}, item)
-            item.JAVID = item.companyName + '-' + item.companyId
+
+            item.JAVID = (`${item.JAVID}`.indexOf('-') !== -1) ? item.JAVID : (item.companyName + '-' + item.companyId)
             item.posterFileURL = file.getProxyPrefix() + item.posterFileURL
+
+            if (item.version === 2) {
+                item.screenshotFilesURL = JSON.parse(item.screenshotFilesURL)
+                for (const i in item.screenshotFilesURL) {
+                    item.screenshotFilesURL[i] = file.getProxyPrefix() + item.screenshotFilesURL[i]
+                }
+            }
+
             processed.push(Object.assign(item, await this.getMetaByMetadataId(item.id)))
         }
 
@@ -108,7 +124,7 @@ class Metadata {
      *
      * @returns {Int} metadata id
      */
-    async getMetadataId (JAVID) {
+    async getMetadataId (JAVID, version = 1, JAVmetadata) {
         logger.debug('Creating JAV metadata record', JAVID)
 
         return new Promise(async (resolve) => {
@@ -118,24 +134,51 @@ class Metadata {
                     resolve(metadataId.id)
                 } else {
                     await db.transaction(async trx => {
-                        const JAVinfo = await this.fetchNew(JAVID)
-                        logger.debug('JAVinfo', JAVinfo)
+                        let JAVinfo
 
-                        if (!JAVinfo || !JAVinfo.tags.length || !JAVinfo.stars.length) {
-                            logger.warn('Invalid info for', JAVinfo)
-                            await ignore.addIgnore(JAVID)
+                        switch (version) {
+                        case 1:
+                            JAVinfo = await this.fetchNew(JAVID)
+                            logger.debug('JAVinfo', JAVinfo)
+
+                            if (!JAVinfo || !JAVinfo.tags.length || !JAVinfo.stars.length) {
+                                logger.warn('Invalid info', JAVinfo)
+                                await ignore.addIgnore(JAVID)
+                                resolve(0)
+                                return
+                            }
+                            break
+
+                        case 2:
+                            if (!JAVmetadata || !JAVmetadata.tags.length || !JAVmetadata.stars.length) {
+                                logger.warn('Invalid version 2 JAV metadata', JAVmetadata)
+                                resolve(0)
+                                return
+                            }
+
+                            JAVinfo = JAVmetadata
+                            break
+
+                        default:
+                            logger.warn(`Unknown version '${version}'`)
                             resolve(0)
                             return
                         }
 
-                        let metadataId = await db('metadatas').insert({
+                        const dbData = {
                             title: JAVinfo.title,
                             companyName: JAVID.split('-')[0],
                             companyId: JAVID.split('-')[1],
                             posterFileURL: JAVinfo.cover,
                             releaseDate: JAVinfo.releaseDate,
-                            updateTime: (new Date()).getTime()
-                        }).transacting(trx).select('id')
+                            updateTime: (new Date()).getTime(),
+                            version
+                        }
+
+                        if (version === 2) dbData.screenshotFilesURL = JAVinfo.screenshots
+                        else dbData.screenshotFilesURL = []
+
+                        let metadataId = await db('metadatas').insert(dbData).transacting(trx).select('id')
                         metadataId = metadataId[0]
 
                         const promises = []
