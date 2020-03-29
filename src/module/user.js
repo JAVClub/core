@@ -94,7 +94,11 @@ class User {
         logger.debug('Checking token', token)
         const result = await db('users').where('token', token).select('id').first()
 
-        if (result && result.id > 0) return result.id
+        if (result && result.id > 0) {
+            await db('users').where('token', token).update('lastSeen', (new Date()).getTime())
+
+            return result.id
+        }
 
         return 0
     }
