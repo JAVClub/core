@@ -112,10 +112,11 @@ class googleDrive {
             this.logger.debug('Storyboard folder id', storyboardId)
 
             storyboardList = await this.client.getFileList(`'${storyboardId}' in parents`)
-            if (storyboardList.length !== 50 || !videoId) {
-                this.logger.info(`Video ${info.hash} havn't fully upload yet`)
-                return
-            }
+        }
+
+        if ((version === 1 && storyboardList.length !== 50) || !videoId) {
+            this.logger.info(`Video ${info.hash} havn't fully upload yet`)
+            return
         }
 
         this.logger.info('Check pass')
