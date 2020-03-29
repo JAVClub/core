@@ -178,6 +178,8 @@ class Metadata {
                         if (version === 2) dbData.screenshotFilesURL = JAVinfo.screenshots
                         else dbData.screenshotFilesURL = []
 
+                        dbData.screenshotFilesURL = JSON.stringify(dbData.screenshotFilesURL)
+
                         let metadataId = await db('metadatas').insert(dbData).transacting(trx).select('id')
                         metadataId = metadataId[0]
 

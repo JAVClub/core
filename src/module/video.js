@@ -110,7 +110,7 @@ class Video {
         const JAVID = info.JAVID || (info.company + '-' + info.id)
 
         const metadataId = await metadata.getMetadataId(JAVID, version, info.JAVMetadata)
-        logger.debug('Metadata id', metaId)
+        logger.debug('Metadata id', metadataId)
 
         if (metadataId === 0) {
             return
@@ -135,7 +135,7 @@ class Video {
         if (version === 1) dbData.storyboardFileIdSet = JSON.stringify(fileIds.storyboardId)
         else dbData.storyboardFileIdSet = '[]'
 
-        result = await db('videos').insert(dbData).select('id')
+        const result = await db('videos').insert(dbData).select('id')
 
         logger.info(`[${JAVID}] Video created, id`, result[0])
         return result[0]
