@@ -63,7 +63,7 @@
 部署之前请确保你拥有/完成以下能力/事情:
 - Docker 容器的部署(Optional)
 - Docker Compose 编排的部署(Optional)
-- Node.js / Javacript 基础
+- Node.js / Javascript 基础
 - 基本的报错阅读能力
 - Linux 基础
 - 阅读过《[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)》
