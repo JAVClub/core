@@ -2,13 +2,17 @@ version: '3.2'
 
 services:
 
-  core:
-    image: javclub/core:latest
-    ports:
-      - 3000:3000
-    volumes:
-      - ./config:/usr/src/app/config
-    environment:
-      NODE_ENV: "dev"
-      TZ: ${TZ}
-    restart: on-failure
+    core:
+        image: javclub/core:latest
+        volumes:
+            - ./config:/usr/app/config
+        environment:
+            - NODE_ENV=dev
+        TZ: Asia/Shanghai
+        restart: unless-stopped
+        networks:
+            docker-lemp_default
+
+networks:
+    docker-lemp_default:
+        external: true
