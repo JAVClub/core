@@ -107,7 +107,8 @@ class Metadata {
         for (const i in result) {
             const metadataId = result[i].metadataId
 
-            processed.push(await this.getMetadataById(metadataId))
+            const res = await this.getMetadataById(metadataId)
+            if (res) processed.push(res)
         }
 
         return {
