@@ -8,10 +8,10 @@ services:
             - ./config:/usr/app/config
         environment:
             - NODE_ENV=dev
-        TZ: Asia/Shanghai
+            - TZ=Asia/Shanghai
         restart: unless-stopped
         networks:
-            docker-lemp_default
+            - docker-lemp_default
 
 networks:
     docker-lemp_default:
