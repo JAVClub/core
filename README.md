@@ -1,7 +1,11 @@
 <h1 align="center">
   <img src="https://github.com/JAVClub/core/raw/master/docs/logo.png" alt="JAVClub" width="200">
-  <p>JAVClub</p>
+  <br>JAVClub</br>
 </h1>
+
+来前排挂个人 (逃
+
+![人(¿)](https://i.loli.net/2020/04/05/pbMzYViheFC4EHv.png)
 
 ## Features
 
