@@ -75,7 +75,9 @@
 
 ~~因为原来写的大家反映看不懂, 所以就来写一个 Step by step 的好了~~
 
-写了一小段斟酌了半天, 最后还是选择放弃了, 下面是部署的基本流程, 如果中间有什么不明白的欢迎 Telegram / Email 来骚扰我
+~~写了一小段斟酌了半天, 最后还是选择放弃了, 下面是部署的基本流程,~~ 如果中间有什么不明白的欢迎 Telegram / Email 来骚扰我
+
+**根据某位 dalao 的指点现在又又又重写了一遍文档, 各位可以看看还有没有要补充的内容**
 
 ~~非常希望有个语文好的 julao 来帮忙补全一下文档~~
 
@@ -83,17 +85,47 @@
 
 ~~真不是因为懒是语文真的差劲 (((逃~~
 
-### Google OAuth
+### Fetcher 部署
+
+#### Google OAuth
 
 因为与本项目不怎么相关就不详细介绍了, 请利用搜索引擎查找适合自己的教程
 
 本项目需要的参数: `client_id` `client_secret` `access_token` `refresh_token`
 
-### Option 1: Docker
+#### Docker 部署本体
+
+```bash
+# 下载项目
+git clone https://github.com/JAVClub/fetcher -b RSS
+cd fetcher
+
+# 配置项目
+cp config/dev.example.json dev.json
+vi config/dev.json
+
+# 配置 qBittorrent
+cp config/qbittorrent/qBittorrent/qBittorrent.example.conf config/qbittorrent/qBittorrent/qBittorrent.conf
+
+# 启动并进一步配置 qBittorrent
+sudo docker-compose up -d qbittorrent
+# qBittorrent 已在端口 8585 运行, 默认用户名/密码 admin/adminadmin
+
+# 启动项目
+# sudo docker-compose up -d
+```
+
+若使用 Docker 则默认配置中 qBittorrent 的地址可以不用更改, 仅需添加下载源即可
+
+下载保存的目录为 `./tmp/downloads`, 处理完保存的目录为 `./tmp/sync`, 使用 Docker 安装完成后仅需使用 `rclone move` 监听 `./tmp/sync` 目录即可
+
+### Core&Web 部署
 
 现在本项目已经支持 Docker 了, 现在来稍微讲一下怎么和隔壁 [Docker LEMP](https://github.com/metowolf/docker-lemp) 快速搭建服务端
 
 请确保 Docker 以及 Docker Compose 已安装
+
+#### Docker LEMP
 
 首先肯定是拉取一梭子了 
 
@@ -105,29 +137,15 @@ cp .env.example .env
 cp docker-compose.example.yml docker-compose.yml
 ```
 
-然后编辑 `.env` 更改数据库密码及根据个人喜好定制环境版本, 本项目不需要 Redis 以及 PHP, 如果担心性能消耗可以在 `docker-compose.yml` 中删除相关条目
+然后编辑 `.env` 更改数据库密码及根据个人喜好定制环境版本, 本项目不需要 Redis 以及 PHP, 如果担心性能消耗可以在 `docker-compose.yml` 中删除相关条目, 如果删除了php-fpm, 需要将 `./etc/nginx/conf.d/default.conf` 文件删除
 
-接下来来拉取本项目
-
-回到用户根目录, 继续拉取一梭子
-
-```bash
-git clone https://github.com/JAVClub/core.git JAVClub_core
-cd JAVClub_core
-
-cp config/dev.example.json config/dev.json
-cp docker-compose.example.yml docker-compose.yml
-```
-
-完成后根据[配置](#配置)文档块配置好 `config/dev.json` 即可(MySQL 数据库地址为 `mysql`, 用户名、密码及数据库为你自定义的内容)
-
-还需要做的是配置 Nginx 的转发, Nginx 的作用是提供 WEB UI 以及反代 API, 这里仅提供一段示例 `Nginx conf`
+接下来配置 Nginx 转发, Nginx 的作用是提供 WEB UI 以及反代 API, 这里仅提供一段示例 `Nginx conf`, 配置文件路径为 `./etc/nginx/nginx.conf`, **该配置适用于 Docker 部署**
 
 ```nginx
 server {
     listen 80;
 
-    server_name xxx.net;
+    server_name localhost;
     root /var/www/JAVClub_web/dist;
 
     location / {
@@ -153,15 +171,91 @@ server {
         deny all;
     }
 }
+
+```
+
+##### web UI
+
+接下来拉取 web UI 并 build
+
+```bash
+cd wwwroot/
+git clone https://github.com/JAVClub/web.git JAVClub_web
+cd JAVClub_web
+
+cp src/config.example.js src/config.js
+npm install
+npm run build
+```
+
+这时候 web UI 的编译版本就已经存放在 `JAVClub_web/dist` 下了, 也就是上文中 Nginx 设置的根目录地址
+
+#### Core
+
+接下来来拉取本项目
+
+回到用户根目录, 继续拉取一梭子
+
+```bash
+git clone https://github.com/JAVClub/core.git JAVClub_core
+cd JAVClub_core
+
+cp config/dev.example.json config/dev.json
+cp docker-compose.example.yml docker-compose.yml
+```
+
+完成后根据[配置](#配置)文档块配置好 `config/dev.json` 即可(MySQL 数据库地址为 `mysql`, 用户名、密码及数据库为你自定义的内容), 或直接如下配置, *该配置适用于 Docker 部署*
+
+```json
+{
+    "system": {
+        "logLevel": "debug",
+        "port": 3000,
+        "path": "/api",
+        "allowChangeUsername": false,
+        "userMaxBookmarkNum": 10,
+        "userMaxBookmarkItemNum": 100,
+        "corsDomain": [
+            "https://localhost" # 配置为自己的domain
+        ]
+    },
+    "database": {
+        "connectionLimit": 5,
+        "host": "mysql",
+        "user": "javclub", # 需后续在 phpmyadmin 中新增用户及数据库
+        "password": "javclub",
+        "database": "javclub"
+    },
+    "importer": {
+        "settings": {
+            "googleDrive": {
+                "queueNum": 5
+            }
+        },
+
+        "cron": [
+            {
+                "driveId": 1,
+                "interval": 36000000,
+                "doFull": true
+            }
+        ]
+    },
+    "proxy": [
+        "https://proxy.xiaolin.in/" # 参考项目 JAVClub/workers 部署自己的 workers
+    ]
+}
+
 ```
 
 最后一步就是配置数据库的默认数据了, 参考[数据库](#数据库)文档块配置即可
 
 最最后依次在 `docker-lemp` 和 `JAVClub_core` 目录中输入 `sudo docker-compose up -d` 即可
 
-未完待续.....
+访问 localhost 可成功访问 webUI 界面, 并成功登陆, 即代表部署成功
 
-**以下为原文档**
+<details>
+    <summary>以下为原文档</summary>
 
 ### 配置
 
@@ -429,6 +523,8 @@ core 中的数据来源是 fetcher 上传至 Google Drive 中的数据, 请在�
 没有意外的话现在服务端和 API 服务器应该已经启动并正常工作了, 可以观察一下输出日志中有没有错误 (如果有一定一定一定要来提 IS 哇 (超大声
 
 WEB 端请求的 API 路径默认为 `/api`, 所以只需要在 Nginx 中将 `/api` 代理到 `core:3000` 即可, 详细操作可以至搜索引擎处搜索 `nginx proxy_pass`
+
+</details>
 
 ### 完成
 
