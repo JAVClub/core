@@ -26,7 +26,7 @@ logger.debug('Config:', cron)
             setTimeout(async () => {
                 logger.info(`[${item.driveId}] Starting import process`)
 
-                await startProcess(false)
+                await startProcess(importerClass, false)
 
                 logger.info(`[${item.driveId}] Import process fininshed`)
                 setCron()
