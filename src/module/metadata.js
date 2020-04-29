@@ -485,7 +485,7 @@ class Metadata {
                 .orWhere('companyId', 'like', `%${param}%`)
         }
 
-        const total = await result.clone().count()
+        let total = await result.clone().count()
         total = total[0]['count(*)']
 
         result = await result.select('*').paginate({
