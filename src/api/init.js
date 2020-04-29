@@ -6,8 +6,16 @@ const cookieParser = require('cookie-parser')
 const user = require('./../module/user')
 const config = require('./../module/config')
 const cache = require('./../module/cache')
+const Sentry = require('@sentry/node')
 
 const pathPrefix = config.get('system.path')
+
+Sentry.init({
+    dsn: 'https://a5df6f6888404ec492be93b7e93b5dd3@o230009.ingest.sentry.io/5217379'
+})
+
+app.use(Sentry.Handlers.requestHandler())
+app.use(Sentry.Handlers.errorHandler())
 
 app.use(cookieParser())
 app.use(bodyParser.json())
