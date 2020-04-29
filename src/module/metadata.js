@@ -486,7 +486,7 @@ class Metadata {
         for (const i in params) {
             const param = params[i]
 
-            result = result.orWhere('title', 'like', `%${param}%`)
+            result = result.andWhere('title', 'like', `%${param}%`)
                 .orWhere('companyName', 'like', `%${param}%`)
                 .orWhere('companyId', 'like', `%${param}%`)
         }
