@@ -120,7 +120,7 @@ router.get('/search/:str/:page?/:size?', async (req, res) => {
     size = parseInt(size || 20)
     logger.debug(`Search string ${str}, page ${page}, size ${size}`)
 
-    if (page < 1 || size < 1 || size > 50 || str.length > 0) {
+    if (page < 1 || size < 1 || size > 50 || str.length <= 0) {
         res.json({
             code: -2,
             msg: 'Param error',

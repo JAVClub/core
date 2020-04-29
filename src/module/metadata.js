@@ -475,28 +475,23 @@ class Metadata {
     async searchMetadata (searchStr, page, size) {
         const params = `${searchStr}`.split(' ', parseInt(config.get('system.searchParmaNum')) || 3)
 
-        let result = db('metadatas').orderBy('releaseDate', 'desc')
-        let total = db('metadatas').orderBy('releaseDate', 'desc')
+        let result = db('metadatas').orderBy('releaseDate', 'desc').where('updateTime', '>', '-1')
 
         for (const i in params) {
             const param = params[i]
 
-            result = result.where('title', 'like', `%${param}%`)
-                .where('companyName', 'like', `%${param}%`)
-                .where('companyId', 'like', `%${param}%`)
-
-            total = total.where('title', 'like', `%${param}%`)
-                .where('companyName', 'like', `%${param}%`)
-                .where('companyId', 'like', `%${param}%`)
+            result = result.orWhere('title', 'like', `%${param}%`)
+                .orWhere('companyName', 'like', `%${param}%`)
+                .orWhere('companyId', 'like', `%${param}%`)
         }
+
+        const total = await result.clone().count()
+        total = total[0]['count(*)']
 
         result = await result.select('*').paginate({
             perPage: size,
             currentPage: page
         })
-
-        total = await total.count()
-        total = total[0]['count(*)']
 
         result = result.data
         if (!result) return []
