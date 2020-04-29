@@ -422,7 +422,7 @@ class Metadata {
 
         result = await db('series_mapping').where('metadataId', id).select('*').first()
         if (result) {
-            metas.series = (await this.getMetaInfoByMetaId('series', result.id))
+            metas.series = (await this.getMetaInfoByMetaId('series', result.seriesId))
         }
 
         return metas
