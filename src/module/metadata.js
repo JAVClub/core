@@ -6,6 +6,7 @@ const db = require('./database')
 const cache = require('./cache')
 const file = require('./file')
 const ignore = require('./ignore')
+const config = require('./config')
 
 class Metadata {
     /**
@@ -22,17 +23,10 @@ class Metadata {
 
         if (!result) return null
 
-        result = Object.assign({}, result)
-        result.JAVID = (`${result.JAVID}`.indexOf('-') !== -1) ? result.JAVID : (result.companyName + '-' + result.companyId)
-        result.posterFileURL = file.getProxyPrefix() + result.posterFileURL
-        if (result.version === 2) {
-            result.screenshotFilesURL = JSON.parse(result.screenshotFilesURL)
-            for (const i in result.screenshotFilesURL) {
-                result.screenshotFilesURL[i] = file.getProxyPrefix() + result.screenshotFilesURL[i]
-            }
-        }
+        result = await this._processMetadataList([result])
+        result = result[0]
 
-        return Object.assign(result, await this.getMetaByMetadataId(id))
+        return result
     }
 
     /**
@@ -55,23 +49,7 @@ class Metadata {
         result = result.data
         if (!result) return []
 
-        const processed = []
-        for (const i in result) {
-            let item = result[i]
-            item = Object.assign({}, item)
-
-            item.JAVID = (`${item.JAVID}`.indexOf('-') !== -1) ? item.JAVID : (item.companyName + '-' + item.companyId)
-            item.posterFileURL = file.getProxyPrefix() + item.posterFileURL
-
-            if (item.version === 2) {
-                item.screenshotFilesURL = JSON.parse(item.screenshotFilesURL)
-                for (const i in item.screenshotFilesURL) {
-                    item.screenshotFilesURL[i] = file.getProxyPrefix() + item.screenshotFilesURL[i]
-                }
-            }
-
-            processed.push(Object.assign(item, await this.getMetaByMetadataId(item.id)))
-        }
+        const processed = await this._processMetadataList(result)
 
         return {
             total,
@@ -494,6 +472,43 @@ class Metadata {
         })
     }
 
+    async searchMetadata (searchStr, page, size) {
+        const params = `${searchStr}`.split(' ', parseInt(config.get('system.searchParmaNum')) || 3)
+
+        let result = db('metadatas').orderBy('releaseDate', 'desc')
+        let total = db('metadatas').orderBy('releaseDate', 'desc')
+
+        for (const i in params) {
+            const param = params[i]
+
+            result = result.where('title', 'like', `%${param}%`)
+                .where('companyName', 'like', `%${param}%`)
+                .where('companyId', 'like', `%${param}%`)
+
+            total = total.where('title', 'like', `%${param}%`)
+                .where('companyName', 'like', `%${param}%`)
+                .where('companyId', 'like', `%${param}%`)
+        }
+
+        result = await result.select('*').paginate({
+            perPage: size,
+            currentPage: page
+        })
+
+        total = await total.count()
+        total = total[0]['count(*)']
+
+        result = result.data
+        if (!result) return []
+
+        result = await this._processMetadataList(result)
+
+        return {
+            total,
+            data: result
+        }
+    }
+
     /**
      * Get type mapping
      *
@@ -521,6 +536,34 @@ class Metadata {
         }
 
         return map
+    }
+
+    /**
+     * Process Knex Object to Object-Array
+     *
+     * @param {Object} result
+     * @returns {Array}
+     */
+    async _processMetadataList (result) {
+        const processed = []
+        for (const i in result) {
+            let item = result[i]
+            item = Object.assign({}, item)
+
+            item.JAVID = (`${item.JAVID}`.indexOf('-') !== -1) ? item.JAVID : (item.companyName + '-' + item.companyId)
+            item.posterFileURL = file.getProxyPrefix() + item.posterFileURL
+
+            if (item.version === 2) {
+                item.screenshotFilesURL = JSON.parse(item.screenshotFilesURL)
+                for (const i in item.screenshotFilesURL) {
+                    item.screenshotFilesURL[i] = file.getProxyPrefix() + item.screenshotFilesURL[i]
+                }
+            } else item.screenshotFilesURL = []
+
+            processed.push(Object.assign(item, await this.getMetaByMetadataId(item.id)))
+        }
+
+        return processed
     }
 }
 

@@ -113,4 +113,32 @@ router.get('/getMetaList/:type/:page?/:size?', async (req, res) => {
     })
 })
 
+router.get('/search/:str/:page?/:size?', async (req, res) => {
+    let { str, page, size } = req.params
+    str = `${str}`
+    page = parseInt(page || 1)
+    size = parseInt(size || 20)
+    logger.debug(`Search string ${str}, page ${page}, size ${size}`)
+
+    if (page < 1 || size < 1 || size > 50 || str.length > 0) {
+        res.json({
+            code: -2,
+            msg: 'Param error',
+            data: {}
+        })
+        return
+    }
+
+    const result = await cache(`api_metadata_search_${str}_${page}_${size}`, async () => {
+        const res = await metadata.searchMetadata(str, page, size)
+        return res
+    }, 60000)
+
+    res.json({
+        code: 0,
+        msg: 'Success',
+        data: result
+    })
+})
+
 module.exports = router

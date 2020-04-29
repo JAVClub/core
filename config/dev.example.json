@@ -8,7 +8,8 @@
         "userMaxBookmarkItemNum": 100,
         "corsDomain": [
             "https://yourdomain.com"
-        ]
+        ],
+        "searchParmaNum": 3
     },
     "database": {
         "connectionLimit": 5,
