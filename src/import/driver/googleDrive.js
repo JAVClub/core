@@ -34,7 +34,6 @@ class googleDrive {
      */
     async run (full = false) {
         this.logger.info('Starting process of import, full =', full)
-        this.client.getFileList(1,2,3,)
 
         const fileList = await this.client.getFileList("name='info.json'", null, full, "modifiedTime desc", (full) ? null : 51)
         this.logger.info('Got info.json file list')
