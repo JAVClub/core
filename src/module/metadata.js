@@ -475,7 +475,13 @@ class Metadata {
     async searchMetadata (searchStr, page, size) {
         const params = `${searchStr}`.split(' ', parseInt(config.get('system.searchParmaNum')) || 3)
 
-        let result = db('metadatas').orderBy('releaseDate', 'desc').where('updateTime', '>', '-1')
+        let result = db('metadatas').orderBy('releaseDate', 'desc')
+
+        const _param = params.shift()
+
+        result = result.where('title', 'like', `%${_param}%`)
+            .orWhere('companyName', 'like', `%${_param}%`)
+            .orWhere('companyId', 'like', `%${_param}%`)
 
         for (const i in params) {
             const param = params[i]
