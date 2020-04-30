@@ -3,25 +3,21 @@
   <br>JAVClub</br>
 </h1>
 
-来前排挂个人 (逃
-
-![人(¿)](https://i.loli.net/2020/04/05/pbMzYViheFC4EHv.png)
-
 ## Features
 
 - 支持在线播放
 - 全自动爬取、下载、上传、处理
 - 视频、图片数据不占用本地空间
 - 代理后速度播放速度可观, 不代理亦可看
-- 多用户系统, 可以与的好基友一起穿越 (不是
+- 多用户系统, 可以与的好基友一起穿越
 - 支持收藏夹
-- ~~面熟的话可以直接白嫖~~白嫖 (逃 -> [Google Form](https://forms.gle/SphJGNRxbjjhf4bU8)
+- ~~面熟的话大概可以直接白嫖~~
 
 ## 简介
 
-嘛这是一个星际涩情(划掉)系列 Repos, 包含三个子项目, 分别是 [fetcher](https://github.com/JAVClub/fetcher)、[web](https://github.com/JAVClub/web) 还有这个项目, 用处嘛就是你们想得那样啦
+这是一个涩情(划掉)系列 Repos, 包含三个子项目, 分别是 [fetcher](https://github.com/JAVClub/fetcher)、[web](https://github.com/JAVClub/web) 还有这个项目
 
-稍微逛了一下 GitHub, 貌似现有的 JAV 数据库都仅限于存储 Metadata(JAV 元数据[车牌号、cover 等等]) 及没啥用的种子信息, 没法做到在线观看, 所以这就是一个集搜集、下载、存储、观看、管理为一体的东西啦 (不是 (大雾
+稍微逛了一下 GitHub, 发现现有的 JAV 数据库都仅限于存储 Metadata(JAV 元数据[车牌号、cover 等等]) 及没啥用的种子信息, 没法做到在线观看, 所以这就是一个集搜集、下载、存储、观看、管理为一体的东西了
 
 <details>
 
@@ -73,17 +69,17 @@
 - 阅读过《[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)》
 - ~~可以克制住自己想把作者往死里揍心情的能力~~
 
+如果不满足的话也可以直接跳到[这里](#后续)康康有什么法子白嫖
+
 ~~因为原来写的大家反映看不懂, 所以就来写一个 Step by step 的好了~~
 
 ~~写了一小段斟酌了半天, 最后还是选择放弃了, 下面是部署的基本流程,~~ 如果中间有什么不明白的欢迎 Telegram / Email 来骚扰我
 
 **根据某位 dalao 的指点现在又又又重写了一遍文档, 各位可以看看还有没有要补充的内容**
 
-~~非常希望有个语文好的 julao 来帮忙补全一下文档~~
+~~如果实在需要可以用[爱发电](https://afdian.net/@isXiaoLin) (雾~~
 
-~~如果实在需要可以用[爱发电](https://afdian.net/@isXiaoLin) (大雾~~
-
-~~真不是因为懒是语文真的差劲 (((逃~~
+~~真不是因为懒是语文真的差劲 (~~
 
 ### Fetcher 部署
 
@@ -127,7 +123,7 @@ sudo docker-compose up -d qbittorrent
 
 #### Docker LEMP
 
-首先肯定是拉取一梭子了 
+首先肯定是拉取一梭子
 
 ```bash
 git clone https://github.com/metowolf/docker-lemp.git
@@ -331,7 +327,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `bookmarks_mapping` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -340,7 +336,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `drivers` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -352,7 +348,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `files` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -361,14 +357,14 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `ignore` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
       `data` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `metadatas` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -382,7 +378,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `series` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -390,7 +386,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `series_mapping` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -399,7 +395,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `stars` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -408,7 +404,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `stars_mapping` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -417,7 +413,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `tags` (
       `id` smallint(6) unsigned NOT NULL AUTO_INCREMENT,
@@ -425,7 +421,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `tags_mapping` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -434,7 +430,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `users` (
       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -445,7 +441,7 @@ cp docker-compose.example.yml docker-compose.yml
       `lastSeen` tinytext,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   CREATE TABLE `videos` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -459,7 +455,7 @@ cp docker-compose.example.yml docker-compose.yml
       `updateTime` tinytext NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   ```
 
 </details>
@@ -509,7 +505,7 @@ core 中的数据来源是 fetcher 上传至 Google Drive 中的数据, 请在�
   curl -I https://www.javbus.com
   ```
 
-如果上述的 Checklist 已经完成, 那么恭喜, 很快新世界的大门就要敞开了! (大雾
+如果上述的 Checklist 已经完成, 那么恭喜, 很快新世界的大门就要敞开了! (雾
 
 **启动服务端及与 WEB 端整合**
 
@@ -520,7 +516,7 @@ core 中的数据来源是 fetcher 上传至 Google Drive 中的数据, 请在�
 - Docker: `sudo docker start javclub_core`
 - 单机: `NODE_ENV=dev node src/app.js`
 
-没有意外的话现在服务端和 API 服务器应该已经启动并正常工作了, 可以观察一下输出日志中有没有错误 (如果有一定一定一定要来提 IS 哇 (超大声
+没有意外的话现在服务端和 API 服务器应该已经启动并正常工作了, 可以观察一下输出日志中有没有错误 (如果有务必将错误日志提交至 Issue
 
 WEB 端请求的 API 路径默认为 `/api`, 所以只需要在 Nginx 中将 `/api` 代理到 `core:3000` 即可, 详细操作可以至搜索引擎处搜索 `nginx proxy_pass`
 
@@ -528,23 +524,23 @@ WEB 端请求的 API 路径默认为 `/api`, 所以只需要在 Nginx 中将 `/a
 
 ### 完成
 
-恭喜现在 JAVClub 已经成功运行起来啦!
+现在 JAVClub 已经成功运行起来了
 
-那么在这里祝你身体健康 (溜
+那么在这里祝你身体健康
 
 ## 后续
 
-先感谢看完这篇废话连篇的使用文档, 有很多东西可能没有说明白, 如果有问题请尽管开 IS 来轰炸我吧 (不是, 也请有技术的小伙伴多多提交 PR (溜
+先感谢看完这篇废话连篇的使用文档, 有很多东西可能没有说明白, 如果有问题请尽管开 IS 来轰炸我吧
 
 正常来讲现在整套系统应该已经在正常工作了, 如果没有请再次检查是否漏掉了任何一个步骤
 
-嘛如果实在是不想那么麻烦也可以来使用我们的私有服务(DEMO 的站点), 为了避免被 jvbao 所以现在是自荐加入, Twitter 上被我关注的小伙伴是默认有名额的, 直接私信 username 给咱就可获取到账号一枚(哆啦A梦式), 当然如果觉得跟我很脸熟的话也可以直接在 Telegram 私信我, 会视情况发账号哒
+如果还是嫌麻烦也可以直接邮箱来硬肛，不保证看得到+发号就是了 (提盘来见就最好了 hhh
 
 ## 捐赠
 
 嘛写这个虽然不算麻烦但还是挺繁琐的, 所以如果想请咱喝一杯咖啡也是可以哒
 
-用[爱发电](https://afdian.net/@isXiaoLin) (大雾
+用[爱发电](https://afdian.net/@isXiaoLin) (雾
 
 ## 免责声明
 
