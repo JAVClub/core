@@ -10,6 +10,8 @@
 - 视频、图片数据不占用本地空间
 - 代理后速度播放速度可观, 不代理亦可看
 - 多用户系统, 可以与的好基友一起穿越
+- 可从公开/私有站点下载数据, 多种选择
+- 半 Docker 自动部署
 - 支持收藏夹
 - ~~面熟的话大概可以直接白嫖~~
 
@@ -60,147 +62,44 @@
 
 ## 部署
 
+**Docker 部署方式请直接[出门左拐](https://github.com/JAVClub/docker)**
+
 部署之前请确保你拥有/完成以下能力/事情:
-- Docker 容器的部署(Optional)
-- Docker Compose 编排的部署(Optional)
+- 一台拥有稳定的国际互联网连通性的服务器
 - Node.js / Javascript 基础
 - 基本的报错阅读能力
 - Linux 基础
 - 阅读过《[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)》
 - ~~可以克制住自己想把作者往死里揍心情的能力~~
 
-如果不满足的话也可以直接跳到[这里](#后续)康康有什么法子白嫖
-
-~~因为原来写的大家反映看不懂, 所以就来写一个 Step by step 的好了~~
-
-~~写了一小段斟酌了半天, 最后还是选择放弃了, 下面是部署的基本流程,~~ 如果中间有什么不明白的欢迎 Telegram / Email 来骚扰我
-
-**根据某位 dalao 的指点现在又又又重写了一遍文档, 各位可以看看还有没有要补充的内容**
-
-~~如果实在需要可以用[爱发电](https://afdian.net/@isXiaoLin) (雾~~
-
-~~真不是因为懒是语文真的差劲 (~~
-
 ### Fetcher 部署
 
-#### Google OAuth
-
-因为与本项目不怎么相关就不详细介绍了, 请利用搜索引擎查找适合自己的教程
-
-本项目需要的参数: `client_id` `client_secret` `access_token` `refresh_token`
-
-#### Docker 部署本体
-
-```bash
-# 下载项目
-git clone https://github.com/JAVClub/fetcher -b RSS
-cd fetcher
-
-# 配置项目
-cp config/dev.example.json dev.json
-vi config/dev.json
-
-# 配置 qBittorrent
-cp config/qbittorrent/qBittorrent/qBittorrent.example.conf config/qbittorrent/qBittorrent/qBittorrent.conf
-
-# 启动并进一步配置 qBittorrent
-sudo docker-compose up -d qbittorrent
-# qBittorrent 已在端口 8585 运行, 默认用户名/密码 admin/adminadmin
-
-# 启动项目
-# sudo docker-compose up -d
-```
-
-若使用 Docker 则默认配置中 qBittorrent 的地址可以不用更改, 仅需添加下载源即可
-
-下载保存的目录为 `./tmp/downloads`, 处理完保存的目录为 `./tmp/sync`, 使用 Docker 安装完成后仅需使用 `rclone move` 监听 `./tmp/sync` 目录即可
+参考 [fetcher - JAVClub/docker](https://github.com/JAVClub/docker/tree/master/fetcher)
 
 ### Core&Web 部署
 
-现在本项目已经支持 Docker 了, 现在来稍微讲一下怎么和隔壁 [Docker LEMP](https://github.com/metowolf/docker-lemp) 快速搭建服务端
+#### Docker
 
-请确保 Docker 以及 Docker Compose 已安装
+参考 [fetcher - JAVClub/docker](https://github.com/JAVClub/docker/tree/master/core)
 
-#### Docker LEMP
+#### 非 Docker
 
-首先肯定是拉取一梭子
+##### 拉取
 
-```bash
-git clone https://github.com/metowolf/docker-lemp.git
-cd docker-lemp
-
-cp .env.example .env
-cp docker-compose.example.yml docker-compose.yml
-```
-
-然后编辑 `.env` 更改数据库密码及根据个人喜好定制环境版本, 本项目不需要 Redis 以及 PHP, 如果担心性能消耗可以在 `docker-compose.yml` 中删除相关条目, 如果删除了php-fpm, 需要将 `./etc/nginx/conf.d/default.conf` 文件删除
-
-接下来配置 Nginx 转发, Nginx 的作用是提供 WEB UI 以及反代 API, 这里仅提供一段示例 `Nginx conf`, 配置文件路径为 `./etc/nginx/nginx.conf`, **该配置适用于 Docker 部署**
-
-```nginx
-server {
-    listen 80;
-
-    server_name localhost;
-    root /var/www/JAVClub_web/dist;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api {
-        proxy_pass http://javclub_core_core_1:3000;
-        proxy_set_header   X-Forwarded-Proto $scheme;
-        proxy_set_header   Host              $http_host;
-        proxy_set_header   X-Real-IP         $remote_addr;
-    }
-
-    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|mp4|ico)$ {
-        expires 30d;
-        access_log off;
-    }
-    location ~ .*\.(js|css)?$ {
-        expires 7d;
-        access_log off;
-    }
-    location ~ /\.ht {
-        deny all;
-    }
-}
-
-```
-
-##### web UI
-
-接下来拉取 web UI 并 build
-
-```bash
-cd wwwroot/
-git clone https://github.com/JAVClub/web.git JAVClub_web
-cd JAVClub_web
-
-cp src/config.example.js src/config.js
-npm install
-npm run build
-```
-
-这时候 web UI 的编译版本就已经存放在 `JAVClub_web/dist` 下了, 也就是上文中 Nginx 设置的根目录地址
-
-#### Core
-
-接下来来拉取本项目
-
-回到用户根目录, 继续拉取一梭子
+请确保主机已安装 Node.js 环境 (版本 10.0+)
 
 ```bash
 git clone https://github.com/JAVClub/core.git JAVClub_core
 cd JAVClub_core
-
 cp config/dev.example.json config/dev.json
-cp docker-compose.example.yml docker-compose.yml
+npm i
 ```
 
-完成后根据[配置](#配置)文档块配置好 `config/dev.json` 即可(MySQL 数据库地址为 `mysql`, 用户名、密码及数据库为你自定义的内容), 或直接如下配置, *该配置适用于 Docker 部署*
+##### 配置文件
+
+<details>
+
+  <summary>配置文件 (点击展开)</summary>
 
 ```json
 {
@@ -212,61 +111,9 @@ cp docker-compose.example.yml docker-compose.yml
         "userMaxBookmarkNum": 10,
         "userMaxBookmarkItemNum": 100,
         "corsDomain": [
-            "https://localhost" # 配置为自己的domain
-        ]
-    },
-    "database": {
-        "connectionLimit": 5,
-        "host": "mysql",
-        "user": "javclub", # 需后续在 phpmyadmin 中新增用户及数据库
-        "password": "javclub",
-        "database": "javclub"
-    },
-    "importer": {
-        "settings": {
-            "googleDrive": {
-                "queueNum": 5
-            }
-        },
-
-        "cron": [
-            {
-                "driveId": 1,
-                "interval": 36000000,
-                "doFull": true
-            }
-        ]
-    },
-    "proxy": [
-        "https://proxy.xiaolin.in/" # 参考项目 JAVClub/workers 部署自己的 workers
-    ]
-}
-
-```
-
-最后一步就是配置数据库的默认数据了, 参考[数据库](#数据库)文档块配置即可
-
-最最后依次在 `docker-lemp` 和 `JAVClub_core` 目录中输入 `sudo docker-compose up -d` 即可
-
-访问 localhost 可成功访问 webUI 界面, 并成功登陆, 即代表部署成功
-
-<details>
-    <summary>以下为原文档</summary>
-
-### 配置
-
-<details>
-
-  <summary>配置文件 (点击展开)</summary>
-
-```json
-{
-    "system": {
-        "logLevel": "debug",
-        "port": 3000,
-        "allowChangeUsername": false,
-        "userMaxBookmarkNum": 10,
-        "userMaxBookmarkItemNum": 100
+            "https://yourdomain.com"
+        ],
+        "searchParmaNum": 3
     },
     "database": {
         "connectionLimit": 5,
@@ -286,7 +133,7 @@ cp docker-compose.example.yml docker-compose.yml
             {
                 "driveId": 1,
                 "interval": 36000000,
-                "doFull": false
+                "doFull": true
             }
         ]
     },
@@ -294,233 +141,105 @@ cp docker-compose.example.yml docker-compose.yml
         "https://your.img.proxy/"
     ]
 }
+
 ```
 </details>
 
+- **system**
+  - path: API 监听的路径
+  - corsDomain: cors 头允许的域名
+  - searchParmaNum: 搜索允许的关键词数量
 - **importer**
   - settings.googleDrive.queueNum: (Int) Importer 导入时队列并行数
-  - cron[].driverId: (Int) 数据库 `drivers` 表中添加的 Driver ID
-  - cron[].interval: (Int) 每隔多少毫秒运行一次该 Driver 的 Importer
-  - cron[].doFull: (Boolean) 启动程序后第一次运行时是否扫描全部内容 (建议导入完成后关闭)
+  - cron[].driverId: (Int) 数据库 `drivers` 表中条目的 ID
+  - cron[].interval: (Int) 每隔多少毫秒 扫描一次这个云端硬盘
+  - cron[].doFull: (Boolean) 启动程序后第一次运行时是否扫描云盘全部内容 (建议第一次导入完成后关闭)
 - **proxy** (Array) 用于代理 Metadata Cover 及 Star Cover 的反代 URL (请求格式: `https://your.img.proxy/https://url.to/imgage.png`)
 
-将 `config/dev.example.json` 修改为 `config/dev.json` 并更改配置即可
+按照提示修改 `config/dev.json` 并更改相关配置即可
 
-### 数据库
+其中 `cron` 字段的相关设定可以暂时不用填写, 下文会有详细讲解
+至于 `proxy` 字段, 如果不想部署图片代理的话也可以直接填写 `[""]`
 
-因程序比较简洁, 不准备制作安装界面, 请自行导入数据表
+##### 数据库
+
+因程序不打算弄太复杂, 所以没有安装界面, 请自行导入数据表
 
 推荐使用 PMA 可视化操作
 
-导入成功后需要加入默认数据, 分别是 user 表、drivers 表, 具体请参考下文
+数据库文件: https://github.com/JAVClub/docker/blob/master/core/sql.db
 
-<details>
+导入后会自动添加第一个用户, 账号密码: `admin/123456`
 
-  <summary>数据表 (点击展开)</summary>
-
-  ```sql
-  CREATE TABLE `bookmarks` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `uid` tinyint(4) DEFAULT NULL,
-      `name` tinytext,
-      `createTime` tinytext,
-      `updateTime` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `bookmarks_mapping` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `bookmarkId` tinyint(4) DEFAULT NULL,
-      `metadataId` int(11) DEFAULT NULL,
-      `updateTime` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `drivers` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `name` tinytext NOT NULL,
-      `driverType` tinytext NOT NULL,
-      `driverData` longtext NOT NULL,
-      `isEnable` tinyint(4) DEFAULT '0',
-      `createTime` tinytext NOT NULL,
-      `updateTime` tinytext NOT NULL,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `files` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `driverId` tinyint(4) NOT NULL,
-      `storageData` tinytext NOT NULL,
-      `updateTime` tinytext NOT NULL,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `ignore` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `data` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `metadatas` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `title` text NOT NULL,
-      `companyName` tinytext NOT NULL,
-      `companyId` tinytext NOT NULL,
-      `posterFileURL` text,
-      `releaseDate` tinytext NOT NULL,
-      `screenshotFilesURL` text,
-      `version` tinyint(4) DEFAULT '1',
-      `updateTime` tinytext NOT NULL,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `series` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `name` text NOT NULL,
-      `updateTime` tinytext NOT NULL,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `series_mapping` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `metadataId` int(11) DEFAULT NULL,
-      `seriesId` int(11) DEFAULT NULL,
-      `updateTime` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `stars` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `name` tinytext NOT NULL,
-      `photoURL` text,
-      `updateTime` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `stars_mapping` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `metadataId` int(11) DEFAULT NULL,
-      `starId` int(11) DEFAULT NULL,
-      `updateTime` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `tags` (
-      `id` smallint(6) unsigned NOT NULL AUTO_INCREMENT,
-      `name` tinytext,
-      `updateTime` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `tags_mapping` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `metadataId` int(11) NOT NULL,
-      `tagId` smallint(6) NOT NULL,
-      `updateTime` tinytext NOT NULL,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `users` (
-      `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-      `username` tinytext,
-      `password` tinytext,
-      `token` tinytext,
-      `updateTime` tinytext,
-      `lastSeen` tinytext,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-  CREATE TABLE `videos` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `metadataId` int(11) NOT NULL,
-      `videoFileId` int(11) DEFAULT NULL,
-      `isHiden` char(1) DEFAULT '0',
-      `infoFileId` int(11) NOT NULL,
-      `videoMetadata` json NOT NULL,
-      `version` tinyint(4) DEFAULT '1',
-      `storyboardFileIdSet` json NOT NULL,
-      `updateTime` tinytext NOT NULL,
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `id` (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-  ```
-
-</details>
-
-### 安装
-
-core 的入口文件是 src/app.js, 开启时建议使用 dev 模式 (`NODE_ENV=dev node src/app.js`) 以便于获取详细调试信息
-
-**Option 1:** Docker 安装
-
-请确保主机已安装 Docker 环境且已按上述步骤配置完程序
-
-```bash
-git clone https://github.com/JAVClub/core.git JAVClub_core
-cd JAVClub_core
-sudo docker pull javclub/core
-sudo docker create -e NODE_ENV=dev -v ./config:/usr/src/app/config --name javclub_core javclub/core
-```
-
-**Option 2:** 直接安装
-
-请确保主机已安装 Node.js 环境 (版本 10.0+)
-
-```bash
-git clone https://github.com/JAVClub/core.git JAVClub_core
-cd JAVClub_core
-npm i
-```
-
-执行完上述命令后根据选择配置的不同运行 `NODE_ENV=dev/stage node src/app.js` 即可
-
-### 使用
+##### 配置
 
 core 中的数据来源是 fetcher 上传至 Google Drive 中的数据, 请在使用前 1-2 天部署好 fetcher 以获取足够的数据
 
-**使用前准备:**
-- 向数据库中 `drivers` 表中插入数据, 参考如下, 替换其中以 `【】` 包裹的内容即可 (目前仅支持 Google Drive) (【your_gd_proxy_server_here】的内容请参考 [workers](https://github.com/JAVClub/workers), 需要 `https://` 以及 `/`, 多个地址请用 `,` 分割)
-  ```sql
-  INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `createTime`, `updateTime`) VALUES
-  (1, '1', 'gd', '{\"oAuth\":{\"client_id\":\"【your_client_here】\",\"client_secret\":\"【your_client_secret_here】\",\"redirect_uri\":\"urn:ietf:wg:oauth:2.0:oob\",\"token\":{\"access_token\":\"【your_access_token_here_optional】\",\"refresh_token\":\"【your_refresh_token_here】\",\"scope\":\"https://www.googleapis.com/auth/drive\",\"token_type\":\"Bearer\",\"expiry_date\":1583679345619}},\"drive\":{\"driveId\":\"【your_drive_or_folder_id_here】\"},\"encryption\":{\"secret\":\"【path_ase_secret】\",\"server\":\"【your_gd_proxy_server_here】"}}', 1, '【timestanp_in_ms_here】', '【timestanp_in_ms_here】');
-  ```
-- 向数据库 `users` 表中插入默认用户, 密码加密算法为 Bcrypt(round=10), 添加时可使用默认密码(123456) `$2b$10$pOavdaA2Pb4HXTCqecCbA.wepz0ArXjrNAn35mSwB55K43HVSdGbi` 及猫滚键盘 token, 登录后密码即可自动刷新
-- 若还未导入数据请确保在 `dev.json` 中添加了 `cron` 段, 以便于程序在启动时自动扫描并导入数据
-- 确保在服务器上可正常运行下列命令并正常输出:
-  ```bash
-  curl -I https://www.google.com
-  curl -I https://www.javbus.com
-  ```
+首先要做的是往数据库里添加有关 Google Drive 的信息, SQL 命令如下
+```sql
+INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `createTime`, `updateTime`) VALUES
+(1, '1', 'gd', '{\"oAuth\":{\"client_id\":\"【your_client_here】\",\"client_secret\":\"【your_client_secret_here】\",\"redirect_uri\":\"urn:ietf:wg:oauth:2.0:oob\",\"token\":{\"access_token\":\"【your_access_token_here_optional】\",\"refresh_token\":\"【your_refresh_token_here】\",\"scope\":\"https://www.googleapis.com/auth/drive\",\"token_type\":\"Bearer\",\"expiry_date\":1583679345619}},\"drive\":{\"driveId\":\"【your_drive_or_folder_id_here】\"},\"encryption\":{\"secret\":\"【path_ase_secret】\",\"server\":\"【your_gd_proxy_server_here】"}}', 1, '【timestanp_in_ms_here】', '【timestanp_in_ms_here】');
+```
 
-如果上述的 Checklist 已经完成, 那么恭喜, 很快新世界的大门就要敞开了! (雾
+看起来挺乱的, 这里给一个格式化后的方便理解
+```json
+{
+    "oAuth":{
+        "client_id":"xxx.apps.googleusercontent.com",
+        "client_secret":"",
+        "redirect_uri":"urn:ietf:wg:oauth:2.0:oob",
+        "token":{
+            "access_token":"",
+            "refresh_token":"",
+            "scope":"https://www.googleapis.com/auth/drive",
+            "token_type":"Bearer",
+            "expiry_date":1583679345619
+        }
+    },
+    "drive":{
+        "driveId":"987b3d98q7deuiedsr"
+    },
+    "encryption":{
+        "secret":"secret",
+        "server":"https://proxy.abc.workers.dev,https://proxy.abc.workers.dev"
+    }
+}
+```
+- oAuth 中的顾名思义就是 Google API 的鉴权信息, 按照你的凭证填写即可
+- drive.driveId 是你的云端硬盘 ID, 也就是云端硬盘根目录浏览器地址栏的那一长串东西
+- encryption 是给 Workers 使用的选项
+  - secret 请随便填写串字符 (自己记得就行)
+  - server 是你部署的 Workers 的地址, 多个用 `,` 隔开, 部署时使用的 `aes_password` 请与此处的 secret 保持一致
 
-**启动服务端及与 WEB 端整合**
+成功添加数据库条目之后, `id` 字段的值就是[上文](#配置文件)中 `cron[].driverId` 以及马上提到的该写的东西
 
-如果之前的步骤都有好好完成的话, 那现在剩下的就是启动服务器端以及和 WEB 端整合了
+下一步就是要告诉程序你添加了这个硬盘并且希望扫描/导入这个硬盘中的内容
+那么就只需要在 `dev.json` 中的 `cron` 字段按[上文](#配置文件)中所述添加相应内容即可
 
-#### 启动:
+到现在 core 应该已经配置完成并可以工作了
 
-- Docker: `sudo docker start javclub_core`
-- 单机: `NODE_ENV=dev node src/app.js`
+##### 配置 WebUI
 
-没有意外的话现在服务端和 API 服务器应该已经启动并正常工作了, 可以观察一下输出日志中有没有错误 (如果有务必将错误日志提交至 Issue
+到现在只剩下 WebUI 程序就可以正常工作了, 不过关于 Nginx 的使用方法在这里就不多讲了, 只描述应该怎么做
 
-WEB 端请求的 API 路径默认为 `/api`, 所以只需要在 Nginx 中将 `/api` 代理到 `core:3000` 即可, 详细操作可以至搜索引擎处搜索 `nginx proxy_pass`
+首先是拉取并构建 Web UI
+```bash
+git clone https://github.com/JAVClub/web.git JAVClub_web
+cd JAVClub_web
+cp src/config.example.js src/config.js
+npm i && npm run build
+```
+运行完成之后前端资源就已经构建完成了, 位于 `./dist` 目录下
+这时候只需要在 Nginx 中将除 `/api` 以外的请求重定向至 `./dist/index.html` 文件即可
+至于 `/api` 的请求请转发给 core 核心
 
-</details>
+##### 启动:
+
+`NODE_ENV=dev node src/app.js`
+
+没有意外的话现在 Web UI 和 API 服务器应该已经启动并正常工作了, 可以观察一下输出日志中有没有错误 (如果有务必将错误日志提交至 Issue
+
+如果有任何不明白的欢迎开 Issue 提问
 
 ### 完成
 
