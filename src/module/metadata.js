@@ -355,7 +355,7 @@ class Metadata {
                     updateTime: (new Date()).getTime()
                 }
 
-                if (photoURL) data.photoURL = file.getProxyPrefix() + photoURL
+                if (photoURL) data.photoURL = photoURL
 
                 let id = await db(`${type}`).insert(data).transacting(trx).select('id')
                 id = id[0]
@@ -417,14 +417,14 @@ class Metadata {
     async getMetaInfoByMetaId (type, id) {
         const result = await cache(`getMeta_${type}_${id}`, async () => {
             const res = await db(type).where('id', id).select('*').first()
-            return res
+
+            if (!res) return null
+            if (res.photoURL) res.photoURL = file.getProxyPrefix() + res.photoURL
+
+            return Object.assign({}, res)
         })
 
-        if (!result) return null
-
-        if (result.photoURL) result.photoURL = file.getProxyPrefix() + result.photoURL
-
-        return Object.assign({}, result)
+        return result
     }
 
     /**
