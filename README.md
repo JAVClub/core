@@ -263,16 +263,20 @@ npm i && npm run build
 ## FAQ
 
 - 遇到一大堆问题没办法解决
+
 可以先参考一下 [core#11](https://github.com/JAVClub/core/issues/11) [core#12](https://github.com/JAVClub/core/issues/12) [fetcher#3](https://github.com/JAVClub/fetcher/issues/3#issuecomment-623198549)
 这里是被踩的最多的坑, 可以看看有没有自己遇到的问题
 
 - Docker 部署的相关问题
+
 有关 Docker 部署的任何问题请提交 Issue 或者直接发送邮件询问
 
 - 没有 M-Team 的账号怎么办
+
 现在重写后的 fetcher 也已经支持 OneJAV 了, 所以不需要 M-Team 账号也可以正常使用了
 
 - 这玩意儿真的有人成功部署过吗
+
 说实话我也不知道, 我已经尽最大努力简化安装过程&写说明文档了, 如果还是有不懂的可以提交 Issue
 
 ## 捐赠
