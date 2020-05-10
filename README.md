@@ -21,20 +21,19 @@
 
 稍微逛了一下 GitHub, 发现现有的 JAV 数据库都仅限于存储 Metadata(JAV 元数据[车牌号、cover 等等]) 及没啥用的种子信息, 没法做到在线观看, 所以这就是一个集搜集、下载、存储、观看、管理为一体的东西了
 
-<details>
+项目应该已经差不多进入了稳定期, 各种 TODO 应该有空有兴趣了会填坑, bugfixs 正常, issue 回复期在一至两周左右, 还请见谅
 
-  <summary>往下看之前请先确保你已满 18 周岁</summary>
+往下看之前请先确保你已满 18 周岁
 
-  ![Are you 18](https://github.com/JAVClub/core/raw/master/docs/are-you-18.jpg)
+![Are you 18](https://github.com/JAVClub/core/raw/master/docs/are-you-18.jpg)
 
-</details>
+<small>不要脸地~~来个广告~~回点血: 自建站总数 ~7w, 每天平均新增 20, 随便[发点电](https://afdian.net/@isXiaoLin)邮箱附截图就可以了 (纯回血, 不保证速度及大陆可用性, 回复期跟 issue 一致</small>
 
 ## TODO
 
 - [ ] 公告栏
 - [ ] 用户系统
   - [ ] 邀请注册
-
 
 ## DEMO
 
@@ -77,6 +76,17 @@
 - Linux 基础
 - 阅读过《[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)》
 - ~~可以克制住自己想把作者往死里揍心情的能力~~
+
+总共需要部署三样东西, 它们之间关系是这样的:
+fetcher: 抓取种子->推送 qBittorrent 下载->处理->上传 Google Drive
+↑
+| 通过 Google Drive 相互联系
+↓
+core: 读取 Google Drive 文件列表->导入本地数据库
+↑
+| 通过 API 读取数据库中的内容
+↓
+web: 展示信息
 
 ### Fetcher 部署
 
