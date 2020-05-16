@@ -106,87 +106,82 @@ class Metadata {
     async getMetadataId (JAVID, version = 1, JAVmetadata) {
         logger.debug('Creating JAV metadata record', JAVID)
 
-        return new Promise(async (resolve) => {
-            try {
-                const metadataId = await db('metadatas').where('companyName', JAVID.split('-')[0]).where('companyId', JAVID.split('-')[1]).first()
-                if (metadataId && metadataId.id) {
-                    resolve(metadataId.id)
-                } else {
-                    await db.transaction(async trx => {
-                        let JAVinfo
+        try {
+            const metadataId = await db('metadatas').where('companyName', JAVID.split('-')[0]).where('companyId', JAVID.split('-')[1]).first()
+            if (metadataId && metadataId.id) {
+                return metadataId.id
+            } else {
+                let JAVinfo
 
-                        switch (version) {
-                        case 1:
-                            JAVinfo = await this.fetchNew(JAVID)
-                            logger.debug('JAVinfo', JAVinfo)
+                switch (version) {
+                case 1:
+                    JAVinfo = await this.fetchNew(JAVID)
+                    logger.debug('JAVinfo', JAVinfo)
 
-                            if (!JAVinfo || !JAVinfo.tags.length || !JAVinfo.stars.length) {
-                                logger.warn('Invalid info', JAVinfo)
-                                await ignore.addIgnore(JAVID)
-                                resolve(0)
-                                return
-                            }
-                            break
+                    if (!JAVinfo || !JAVinfo.tags.length || !JAVinfo.stars.length) {
+                        logger.warn('Invalid info', JAVinfo)
+                        await ignore.addIgnore(JAVID)
+                        return 0
+                    }
+                    break
 
-                        case 2:
-                            if (!JAVmetadata || !JAVmetadata.tags.length || !JAVmetadata.stars.length) {
-                                logger.warn('Invalid version 2 JAV metadata', JAVmetadata)
-                                resolve(0)
-                                return
-                            }
+                case 2:
+                    if (!JAVmetadata || !JAVmetadata.tags.length || !JAVmetadata.stars.length) {
+                        logger.warn('Invalid version 2 JAV metadata', JAVmetadata)
+                        return 0
+                    }
 
-                            JAVinfo = JAVmetadata
-                            break
+                    JAVinfo = JAVmetadata
+                    break
 
-                        default:
-                            logger.warn(`Unknown version '${version}'`)
-                            resolve(0)
-                            return
-                        }
-
-                        const dbData = {
-                            title: JAVinfo.title,
-                            companyName: JAVID.split('-')[0],
-                            companyId: JAVID.split('-')[1],
-                            posterFileURL: JAVinfo.cover,
-                            releaseDate: JAVinfo.releaseDate,
-                            updateTime: (new Date()).getTime(),
-                            version
-                        }
-
-                        if (version === 2) dbData.screenshotFilesURL = JAVinfo.screenshots
-                        else dbData.screenshotFilesURL = []
-
-                        dbData.screenshotFilesURL = JSON.stringify(dbData.screenshotFilesURL)
-
-                        let metadataId = await db('metadatas').insert(dbData).transacting(trx).select('id')
-                        metadataId = metadataId[0]
-
-                        const promises = []
-
-                        if (JAVinfo.series) promises.push(this.attachMeta('series', metadataId, JAVinfo.series, null, trx))
-
-                        for (const i in JAVinfo.stars) {
-                            const item = JAVinfo.stars[i]
-                            promises.push(this.attachMeta('star', metadataId, item.name, item.img, trx))
-                        }
-
-                        for (const i in JAVinfo.tags) {
-                            const item = JAVinfo.tags[i]
-                            promises.push(this.attachMeta('tag', metadataId, item, null, trx))
-                        }
-
-                        await Promise.all(promises)
-
-                        logger.debug('Finished attching metas')
-
-                        resolve(metadataId)
-                    })
+                default:
+                    logger.warn(`Unknown version '${version}'`)
+                    return
                 }
-            } catch (error) {
-                logger.error('Error while creating records', error)
+
+                const dbData = {
+                    title: JAVinfo.title,
+                    companyName: JAVID.split('-')[0],
+                    companyId: JAVID.split('-')[1],
+                    posterFileURL: JAVinfo.cover,
+                    releaseDate: JAVinfo.releaseDate,
+                    updateTime: (new Date()).getTime(),
+                    version
+                }
+
+                if (version === 2) dbData.screenshotFilesURL = JAVinfo.screenshots
+                else dbData.screenshotFilesURL = []
+
+                dbData.screenshotFilesURL = JSON.stringify(dbData.screenshotFilesURL)
+
+                let metadataId = await db('metadatas').insert(dbData).select('id')
+                metadataId = metadataId[0]
+
+                const promises = []
+
+                if (JAVinfo.series) promises.push(this.attachMeta('series', metadataId, JAVinfo.series, null))
+
+                for (const i in JAVinfo.stars) {
+                    const item = JAVinfo.stars[i]
+                    promises.push(this.attachMeta('star', metadataId, item.name, item.img))
+                }
+
+                for (const i in JAVinfo.tags) {
+                    const item = JAVinfo.tags[i]
+                    promises.push(this.attachMeta('tag', metadataId, item, null))
+                }
+
+                await (Promise.all(promises).catch((error) => {
+                    logger.error(error)
+                }))
+
+                logger.debug('Finished attching metas')
+
+                return metadataId
             }
-        })
+        } catch (error) {
+            logger.error('Error while creating records', error)
+        }
     }
 
     /**
@@ -337,11 +332,10 @@ class Metadata {
      * @param {String} type value can be: tags, stars, series
      * @param {String} name name
      * @param {String=} photoURL photo URL
-     * @param {trx} trx knex trx object
      *
      * @returns {Int} id
      */
-    async getMetaId (type, name, photoURL, trx) {
+    async getMetaId (type, name, photoURL) {
         try {
             const result = await db(`${type}`).where('name', name).first()
             if (result) {
@@ -357,7 +351,7 @@ class Metadata {
 
                 if (photoURL) data.photoURL = photoURL
 
-                let id = await db(`${type}`).insert(data).transacting(trx).select('id')
+                let id = await db(`${type}`).insert(data).select('id')
                 id = id[0]
 
                 logger.debug(`[${type}] record for`, name, 'created,', id)
@@ -434,42 +428,35 @@ class Metadata {
      * @param {Int} metadataId
      * @param {String} name
      * @param {String=} photoURL photo URL
-     * @param {trx} trx knex trx object
      *
      * @return {Int}
      */
-    async attachMeta (type, metadataId, name, photoURL, trx) {
+    async attachMeta (type, metadataId, name, photoURL) {
         const map = this._getTypeMapping(type)
         logger.debug(map)
 
-        return new Promise(async (resolve) => {
-            try {
-                const id = await this.getMetaId(map.type, name, photoURL, trx)
-                logger.debug(`${map.log} id`, id)
+        try {
+            const id = await this.getMetaId(map.type, name, photoURL)
+            logger.debug(`${map.log} id`, id)
 
-                const count = await db(`${map.type}_mapping`).where(map.column, id).where('metadataId', metadataId).count()
-                await db.transaction(async trx => {
-                    if (count[0]['count(*)'] === 0) {
-                        logger.debug('Create mapping, count', count, count[0]['count(*)'])
+            const count = await db(`${map.type}_mapping`).where(map.column, id).where('metadataId', metadataId).count()
+            if (count[0]['count(*)'] === 0) {
+                logger.debug('Create mapping, count', count, count[0]['count(*)'])
 
-                        const data = {
-                            metadataId,
-                            updateTime: (new Date()).getTime()
-                        }
-                        data[map.column] = id
+                const data = {
+                    metadataId,
+                    updateTime: (new Date()).getTime()
+                }
+                data[map.column] = id
 
-                        await db(`${map.type}_mapping`).insert(data).transacting(trx)
-                        resolve(1)
-                    } else {
-                        logger.debug('Meta exist')
-                        resolve(1)
-                    };
-                })
-            } catch (error) {
-                logger.error('Error while attaching a record', error)
-                throw error
+                await db(`${map.type}_mapping`).insert(data)
+            } else {
+                logger.debug('Meta exists')
             }
-        })
+        } catch (error) {
+            logger.error('Error while attaching a record', error)
+            throw error
+        }
     }
 
     async searchMetadata (searchStr, page, size) {
