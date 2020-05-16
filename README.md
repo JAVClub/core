@@ -27,8 +27,6 @@
 
 ![Are you 18](https://github.com/JAVClub/core/raw/master/docs/are-you-18.jpg)
 
-<small>不要脸地~~来个广告~~回点血: 自建站总数 ~7w, 每天平均新增 20, 随便[发点电](https://afdian.net/@isXiaoLin)邮箱附截图就可以了 (纯回血, 不保证速度及大陆可用性, 回复期跟 issue 一致</small>
-
 ## TODO
 
 - [ ] 公告栏
@@ -269,6 +267,8 @@ npm i && npm run build
 正常来讲现在整套系统应该已经在正常工作了, 如果没有请再次检查是否漏掉了任何一个步骤
 
 如果还是嫌麻烦也可以直接邮箱来硬肛，不保证看得到+发号就是了 (提盘来见就最好了 hhh
+
+不要脸地~~来个广告~~回点血: 自建站总数 ~7w, 每天平均新增 20, 随便[发点电](https://afdian.net/@isXiaoLin)邮箱附截图就可以了 (纯回血, 不保证速度及大陆可用性, 回复期跟 issue 一致
 
 ## FAQ
 
