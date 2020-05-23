@@ -316,7 +316,7 @@ class Metadata {
         const processed = []
         for (const i in result) {
             const item = result[i]
-            if (type === 'stars') item.photoURL = file.getProxyPrefix() + encodeURIComponent(item.photoURL)
+            if (type === 'stars') item.photoURL = file.getProxyPrefix() + item.photoURL
             processed.push(Object.assign({}, item))
         }
 
@@ -413,7 +413,7 @@ class Metadata {
             const res = await db(type).where('id', id).select('*').first()
 
             if (!res) return null
-            if (res.photoURL) res.photoURL = file.getProxyPrefix() + encodeURIComponent(res.photoURL)
+            if (res.photoURL) res.photoURL = file.getProxyPrefix() + res.photoURL
 
             return Object.assign({}, res)
         })
@@ -539,12 +539,12 @@ class Metadata {
             item = Object.assign({}, item)
 
             item.JAVID = (`${item.JAVID}`.indexOf('-') !== -1) ? item.JAVID : (item.companyName + '-' + item.companyId)
-            item.posterFileURL = file.getProxyPrefix() + encodeURIComponent(item.posterFileURL)
+            item.posterFileURL = file.getProxyPrefix() + item.posterFileURL
 
             if (item.version === 2) {
                 item.screenshotFilesURL = JSON.parse(item.screenshotFilesURL)
                 for (const i in item.screenshotFilesURL) {
-                    item.screenshotFilesURL[i] = file.getProxyPrefix() + encodeURIComponent(item.screenshotFilesURL[i])
+                    item.screenshotFilesURL[i] = file.getProxyPrefix() + item.screenshotFilesURL[i]
                 }
             } else item.screenshotFilesURL = []
 
