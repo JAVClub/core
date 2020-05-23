@@ -76,40 +76,25 @@
 - ~~可以克制住自己想把作者往死里揍心情的能力~~
 
 总共需要部署三样东西, 它们之间关系是这样的:
-
+```
 fetcher: 抓取种子->推送 qBittorrent 下载->处理->上传 Google Drive
-
 ↑
-
 | 通过 Google Drive 相互联系
-
 ↓
-
 core: 读取 Google Drive 文件列表->导入本地数据库
-
 ↑
-
 | 通过 API 读取数据库中的内容
-
 ↓
-
 web: 展示信息
-
 ↑
-
 |
-
 ↓
-
 Workers: 代理 Google Drive 文件及 JAVBus 封面
-
 ↑
-
 |
-
 ↓
-
-Vercel: 为 Workers 提供 `access token`
+Vercel: 为 Workers 提供 access token
+```
 
 ### Fetcher 部署
 
