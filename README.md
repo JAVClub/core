@@ -85,10 +85,18 @@ core: 读取 Google Drive 文件列表->导入本地数据库
 | 通过 API 读取数据库中的内容
 ↓
 web: 展示信息
+↑
+|
+↓
+Vercel: 代理 Google Drive 文件及 JAVBus 封面
 
 ### Fetcher 部署
 
 参考 [JAVClub/fetcher](https://github.com/JAVClub/fetcher)
+
+### Vercel 部署
+
+参考 [JAVClub/Vercel](https://github.com/JAVClub/Vercel)
 
 ### Core&Web 部署
 
@@ -151,7 +159,7 @@ npm i
         ]
     },
     "proxy": [
-        "https://your.img.proxy/"
+        "https://your-jav-proxy-name.now.sh/"
     ]
 }
 
@@ -167,7 +175,7 @@ npm i
   - cron[].driverId: (Int) 数据库 `drivers` 表中条目的 ID
   - cron[].interval: (Int) 每隔多少毫秒 扫描一次这个云端硬盘
   - cron[].doFull: (Boolean) 启动程序后第一次运行时是否扫描云盘全部内容 (建议第一次导入完成后关闭)
-- **proxy** (Array) 用于代理 Metadata Cover 及 Star Cover 的反代 URL (请求格式: `https://your.img.proxy/https://url.to/imgage.png`)
+- **proxy** (Array) 用于代理 Metadata Cover 及 Star Cover 的反代 URL (请求格式: `https://your.img.proxy/urlencode(https://url.to/imgage.png)`) (若部署 [JAVClub/Vercel](https://github.com/JAVClub/Vercel) 则填写其 URL 即可
 
 按照提示修改 `config/dev.json` 并更改相关配置即可
 
@@ -214,14 +222,14 @@ INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `cr
     },
     "encryption":{
         "secret":"secret",
-        "server":"https://proxy.abc.workers.dev,https://proxy.def.workers.dev"
+        "server":"https://your-jav-proxy-name.now.sh"
     }
 }
 ```
 - oAuth 中的顾名思义就是 Google API 的鉴权信息, 按照你的凭证填写即可
 - drive.driveId 是你的云端硬盘 ID, 也就是云端硬盘根目录浏览器地址栏的那一长串东西
-- encryption 是给 Workers 使用的选项
-  - secret 请随便填写串字符, 部署 Workers 时使用的 `aes_password` 请与此处的保持一致
+- encryption 是给 Vercel 使用的选项
+  - secret 请随便填写串字符, 部署 Vercel 时使用的 `aesPassword` 请与此处的保持一致
   - server 是你部署的 Workers 的地址, 多个地址用 `,` 隔开
 
 成功添加数据库条目之后, `id` 字段的值就是[上文](#配置文件)中 `cron[].driverId` 以及马上提到的该写的东西
