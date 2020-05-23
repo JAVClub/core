@@ -85,10 +85,22 @@ core: 读取 Google Drive 文件列表->导入本地数据库
 | 通过 API 读取数据库中的内容
 ↓
 web: 展示信息
+↑
+|
+↓
+Workers: 代理 Google Drive 文件及 JAVBus 封面
+↑
+|
+↓
+Vercel: 为 Workers 提供 `access token`
 
 ### Fetcher 部署
 
 参考 [JAVClub/fetcher](https://github.com/JAVClub/fetcher)
+
+### 代理部署
+
+参考 [JAVClub/proxy](https://github.com/JAVClub/proxy)
 
 ### Core&Web 部署
 
