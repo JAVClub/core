@@ -26,7 +26,13 @@ logger.debug('Config:', cron)
       setTimeout(async () => {
         logger.info(`[${item.driveId}] Starting import process`)
 
-        await startProcess(importerClass, false)
+        try {
+          await startProcess(importerClass, false)
+        } catch (e) {
+          logger.error(`[${item.driveId}] Import process threw an error`, e)
+          setCron()
+          return
+        }
 
         logger.info(`[${item.driveId}] Import process fininshed`)
         setCron()
@@ -41,7 +47,13 @@ logger.debug('Config:', cron)
       const doFull = !!(item.doFull)
       logger.info(`[${item.driveId}] Starting first time import process`)
 
-      await startProcess(importerClass, doFull)
+      try {
+        await startProcess(importerClass, doFull)
+      } catch (e) {
+        logger.error(`[${item.driveId}] First time import process threw an error`, e)
+        setCron()
+        return
+      }
 
       logger.info(`[${item.driveId}] First time import process fininshed`)
       setCron()

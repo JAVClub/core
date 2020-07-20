@@ -104,7 +104,7 @@ class Metadata {
      * @returns {Int} metadata id
      */
   async getMetadataId (JAVID, version = 1, JAVmetadata) {
-    logger.debug('Creating JAV metadata record', JAVID)
+    logger.info('Creating JAV metadata record', JAVID)
 
     try {
       const metadataId = await db('metadatas').where('companyName', JAVID.split('-')[0]).where('companyId', JAVID.split('-')[1]).first()
@@ -119,7 +119,7 @@ class Metadata {
           logger.debug('JAVinfo', JAVinfo)
 
           if (!JAVinfo || !JAVinfo.tags.length || !JAVinfo.stars.length) {
-            logger.warn('Invalid info', JAVinfo)
+            logger.info('Invalid info', JAVinfo)
             await ignore.addIgnore(JAVID)
             return 0
           }
@@ -127,7 +127,7 @@ class Metadata {
 
         case 2:
           if (!JAVmetadata || !JAVmetadata.tags.length || !JAVmetadata.stars.length) {
-            logger.warn('Invalid version 2 JAV metadata', JAVmetadata)
+            logger.info('Invalid version 2 JAV metadata', JAVmetadata)
             return 0
           }
 
@@ -135,8 +135,8 @@ class Metadata {
           break
 
         default:
-          logger.warn(`Unknown version '${version}'`)
-          return
+          logger.info(`Unknown version '${version}'`)
+          return 0
         }
 
         const dbData = {
@@ -207,7 +207,7 @@ class Metadata {
       return res
     }, {
       onFailedAttempt: async (error) => {
-        logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+        logger.debug(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
 
         return new Promise((resolve) => {
           setTimeout(() => {

@@ -36,7 +36,7 @@ class googleDrive {
     this.logger.info('Starting process of import, full =', full)
 
     const fileList = await this.client.getFileList('name=\'info.json\'', null, full, 'modifiedTime desc', (full) ? null : 51)
-    this.logger.info('Got info.json file list')
+    this.logger.debug('Got info.json file list')
 
     fileList.forEach((info) => {
       this.queue.add(async (resolve, reject) => {
@@ -77,10 +77,11 @@ class googleDrive {
     }
     const JAVID = info.JAVID || (info.company + '-' + info.id)
     const version = parseInt(info.version || 1)
+    this.logger.info('Processing', JAVID)
 
     this.logger.debug(`${JAVID} info.json file version:`, version)
     if (await ignore.checkIgnoreStatus(JAVID)) {
-      this.logger.info(`Metadata ${JAVID} invalid, skipped`)
+      this.logger.debug(`Metadata ${JAVID} invalid, skipped`)
       return
     }
 
@@ -116,7 +117,7 @@ class googleDrive {
       return
     }
 
-    this.logger.info('Check pass')
+    this.logger.debug(JAVID, 'check pass')
     const fileIds = await this.createFileRecord({
       videoId,
       storyboardList,
@@ -124,6 +125,7 @@ class googleDrive {
     }, version)
 
     const result = await video.createVideo(info, fileIds, version)
+    this.logger.info(JAVID, 'processed!')
 
     return result
   }
@@ -136,7 +138,7 @@ class googleDrive {
      * @returns {Object} file ids
      */
   async createFileRecord (data, version = 1) {
-    this.logger.info('Creating file records')
+    this.logger.debug('Creating file records')
     const fileIds = {
       metaId: 0,
       videoId: 0,

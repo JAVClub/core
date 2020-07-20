@@ -14,7 +14,7 @@ class Ignore {
       data: JSON.stringify(data)
     })
 
-    logger.info('Add', JSON.stringify(data), 'to ignore list')
+    logger.debug('Add', JSON.stringify(data), 'to ignore list')
 
     return result
   }

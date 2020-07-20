@@ -40,7 +40,7 @@ class GoogleDrive {
       this.oAuth2Client = new google.auth.OAuth2(data.client_id, data.client_secret, data.redirect_uri)
     }
 
-    this.logger.info('Retrieving access token')
+    this.logger.debug('Retrieving access token')
     return new Promise((resolve, reject) => {
       this.oAuth2Client.getToken(data.code, (error, token) => {
         if (error) {
@@ -48,7 +48,7 @@ class GoogleDrive {
           reject(new Error('Error retrieving access token'))
           return
         }
-        this.logger.info('Got access token')
+        this.logger.debug('Got access token')
         this.logger.debug(token)
         this.oAuth2Client.setCredentials(token)
 
@@ -81,7 +81,7 @@ class GoogleDrive {
     this.logger.debug('Token expiry date', expiryDate)
     if (((new Date()).getTime() + 600000) < expiryDate) return
 
-    this.logger.info('Refreshing access token')
+    this.logger.debug('Refreshing access token')
     return new Promise((resolve, reject) => {
       this.oAuth2Client.refreshAccessToken((error, token) => {
         if (error) {
@@ -90,7 +90,7 @@ class GoogleDrive {
           return
         }
 
-        this.logger.info('Got access token')
+        this.logger.debug('Got access token')
         this.logger.debug(token)
         resolve(token)
       })
@@ -138,12 +138,12 @@ class GoogleDrive {
           return result
         }, {
           onFailedAttempt: async (error) => {
-            this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+            this.logger.debug(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
 
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve()
-              }, 20000)
+              }, 10000)
             })
           },
           retries: 5
@@ -189,7 +189,7 @@ class GoogleDrive {
   async downloadFile (fileId) {
     if (!this.checkAuthorizationStatus()) return
 
-    this.logger.info('Downloading file', fileId)
+    this.logger.debug('Downloading file', fileId)
 
     let res
 
@@ -209,7 +209,7 @@ class GoogleDrive {
         return result
       }, {
         onFailedAttempt: async (error) => {
-          this.logger.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
+          this.logger.debug(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left`)
 
           return new Promise((resolve) => {
             setTimeout(() => {
