@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const fetch = require('node-fetch')
 const pRetry = require('p-retry')
 const parser = new (require('dom-parser'))()
@@ -161,13 +162,11 @@ class Metadata {
 
         if (JAVinfo.series) promises.push(this.attachMeta('series', metadataId, JAVinfo.series, null))
 
-        for (const i in JAVinfo.stars) {
-          const item = JAVinfo.stars[i]
+        for (const item of _.uniqBy(JAVinfo.stars, 'name')) {
           promises.push(this.attachMeta('star', metadataId, item.name, item.img))
         }
 
-        for (const i in JAVinfo.tags) {
-          const item = JAVinfo.tags[i]
+        for (const item of (new Set(JAVinfo.tags))) {
           promises.push(this.attachMeta('tag', metadataId, item, null))
         }
 
@@ -454,7 +453,7 @@ class Metadata {
         logger.debug('Meta exists')
       }
     } catch (error) {
-      logger.error('Error while attaching a record', error)
+      logger.error('Error while attaching a meta', error)
       throw error
     }
   }

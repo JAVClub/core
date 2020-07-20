@@ -21,7 +21,7 @@ class googleDrive {
     } = require('p-queue')
 
     this.queue = new PQueue({
-      concurrency: config.get('importer.settings.googleDrive.queueNum') || 3
+      concurrency: config.get('importer.settings.googleDrive.queueNum') || 1
     })
   }
 
@@ -39,7 +39,7 @@ class googleDrive {
     this.logger.debug('Got info.json file list')
 
     fileList.forEach((info) => {
-      this.queue.add(async (resolve, reject) => {
+      this.queue.add(async () => {
         this.logger.debug('Handling info.json file', info.id)
 
         let res = await this.client.downloadFile(info.id)
@@ -55,7 +55,7 @@ class googleDrive {
       })
     })
 
-    const result = await this.queue.onEmpty().then(() => {
+    const result = await this.queue.onIdle().then(() => {
       this.logger.info('All Promise settled')
     })
 
