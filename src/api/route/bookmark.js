@@ -101,7 +101,7 @@ router.post('/createBookmark', async (req, res) => {
     })
     return
   }
-  const bookmarkName = body.name
+  const bookmarkName = `${body.name}`.substring(0, 64)
 
   const maxNum = config.get('system.userMaxBookmarkNum') || 10
   if (await bookmark.getBookmarkNumByUserId(req.uid) >= maxNum) {

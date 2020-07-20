@@ -465,16 +465,20 @@ class Metadata {
 
     const _param = params.shift()
 
-    result = result.where('title', 'like', `%${_param}%`)
-      .orWhere('companyName', 'like', `%${_param}%`)
-      .orWhere('companyId', 'like', `%${_param}%`)
+    result = result.where((builder) => {
+      builder.where('title', 'like', `%${_param}%`)
+        .orWhere('companyName', 'like', `%${_param}%`)
+        .orWhere('companyId', 'like', `%${_param}%`)
+    })
 
     for (const i in params) {
       const param = params[i]
 
-      result = result.andWhere('title', 'like', `%${param}%`)
-        .orWhere('companyName', 'like', `%${param}%`)
-        .orWhere('companyId', 'like', `%${param}%`)
+      result = result.where((builder) => {
+        builder.where('title', 'like', `%${param}%`)
+          .orWhere('companyName', 'like', `%${param}%`)
+          .orWhere('companyId', 'like', `%${param}%`)
+      })
     }
 
     let total = await result.clone().count()
