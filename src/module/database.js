@@ -1,7 +1,7 @@
 const config = require('./config')
 const knex = require('knex')({
-    client: 'mysql',
-    connection: config.get('database')
+  client: 'mysql',
+  connection: config.get('database')
 })
 const { attachPaginate } = require('knex-paginate')
 attachPaginate()

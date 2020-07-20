@@ -48,7 +48,9 @@
     "sha256": "^0.2.0"
   },
   "devDependencies": {
-    "standard": "^14.3.3",
-    "standardx": "^5.0.0"
+    "eslint": "^7.3.1",
+    "eslint-plugin-markdown": "^1.0.2",
+    "pkg": "^4.4.9",
+    "standard": "^14.3.4"
   }
 }

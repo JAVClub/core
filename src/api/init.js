@@ -11,7 +11,7 @@ const Sentry = require('@sentry/node')
 const pathPrefix = config.get('system.path')
 
 Sentry.init({
-    dsn: 'https://a5df6f6888404ec492be93b7e93b5dd3@o230009.ingest.sentry.io/5217379'
+  dsn: 'https://a5df6f6888404ec492be93b7e93b5dd3@o230009.ingest.sentry.io/5217379'
 })
 
 app.use(Sentry.Handlers.requestHandler())
@@ -21,43 +21,43 @@ app.use(cookieParser())
 app.use(bodyParser.json())
 
 app.use((req, res, next) => {
-    const whitelist = config.get('system.corsDomain') || []
-    const origin = req.headers.origin || ''
+  const whitelist = config.get('system.corsDomain') || []
+  const origin = req.headers.origin || ''
 
-    if (whitelist.indexOf(origin) > -1) {
-        res.setHeader('Access-Control-Allow-Origin', origin)
-        res.setHeader('Access-Control-Allow-Methods', '*')
-        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-        res.setHeader('Access-Control-Allow-Credentials', 'true')
-    }
+  if (whitelist.indexOf(origin) > -1) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Methods', '*')
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+  }
 
-    next()
+  next()
 })
 
 app.use(async (req, res, next) => {
-    req.uid = -1
+  req.uid = -1
 
-    const path = '' + req.path
-    if (req.cookies && req.cookies.token) {
-        const token = req.cookies.token
-        const uid = await cache(`api_checktoken_${token}`, async () => {
-            const res = await user.verifyToken(token)
-            return res
-        }, 60000)
-        if (uid > 0) {
-            req.uid = uid
-        }
+  const path = '' + req.path
+  if (req.cookies && req.cookies.token) {
+    const token = req.cookies.token
+    const uid = await cache(`api_checktoken_${token}`, async () => {
+      const res = await user.verifyToken(token)
+      return res
+    }, 60000)
+    if (uid > 0) {
+      req.uid = uid
     }
+  }
 
-    logger.debug(`[UID: ${req.uid}]`, req.method.toUpperCase(), req.path)
+  logger.debug(`[UID: ${req.uid}]`, req.method.toUpperCase(), req.path)
 
-    if (path.startsWith(pathPrefix + '/auth') || req.uid > 0) return next()
+  if (path.startsWith(pathPrefix + '/auth') || req.uid > 0) return next()
 
-    res.status(403).json({
-        code: -1,
-        msg: 'Access denied',
-        data: {}
-    })
+  res.status(403).json({
+    code: -1,
+    msg: 'Access denied',
+    data: {}
+  })
 })
 
 app.use(pathPrefix + '/auth', require('./route/auth'))
@@ -69,13 +69,13 @@ app.use(pathPrefix + '/statistic', require('./route/statistic'))
 app.use(pathPrefix + '/user', require('./route/user'))
 
 app.all('*', (req, res) => {
-    res.status(404).json({
-        code: -2,
-        msg: 'Not found',
-        data: {}
-    })
+  res.status(404).json({
+    code: -2,
+    msg: 'Not found',
+    data: {}
+  })
 })
 
 app.listen(config.get('system.port'), () => {
-    logger.info(`JAVClub core is listening on port ${config.get('system.port')}!`)
+  logger.info(`JAVClub core is listening on port ${config.get('system.port')}!`)
 })
