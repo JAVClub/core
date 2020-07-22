@@ -75,6 +75,7 @@ app.use(pathPrefix + '/statistic', require('./route/statistic'))
 app.use(pathPrefix + '/user', require('./route/user'))
 app.use(pathPrefix + '/invitation', require('./route/invitation'))
 app.use(pathPrefix + '/group', require('./route/group'))
+app.use(pathPrefix + '/announcement', require('./route/announcement'))
 
 app.all('*', (req, res) => {
   res.status(404).json({
