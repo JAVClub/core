@@ -51,7 +51,7 @@ class Invitation {
      * @returns {Object} invitation info
      */
   async getInvitationInfo (code) {
-    const result = await db('invitations').where('code', code).select('*')
+    const result = await db('invitations').where('code', code).select('*').first()
 
     return result
   }
@@ -73,7 +73,7 @@ class Invitation {
       }
     }
 
-    const codeInfo = await this.getInvitationInfo(code) || null
+    const codeInfo = await this.getInvitationInfo(code)
     const group = codeInfo.permission_group
     const uid = await user.createUser(username, password, group, 'Using invitation', 'invitation code')
     if (uid === -1) {

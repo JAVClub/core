@@ -8,10 +8,19 @@ const config = require('../../module/config')
 router.post('/login', async (req, res) => {
   const body = req.body
   if (body && body.username && body.password) {
-    const result = await user.getTokenByUsernameAndPassword(body.username, body.password)
+    const result = await user.checkByUsernameAndPassword(body.username, body.password)
 
-    if (result) {
-      res.cookie('token', result, {
+    if (result.token) {
+      const per = await permission.getUserPermissionGroupInfo(result.id)
+      if (per.rule.banned) {
+        res.json({
+          code: -1,
+          msg: 'You had been banned',
+          data: {}
+        })
+        return
+      }
+      res.cookie('token', result.token, {
         maxAge: (new Date()).getTime() / 1000 + 1000 * 3600 * 24 * 180,
         path: '/'
       })
@@ -20,7 +29,7 @@ router.post('/login', async (req, res) => {
         code: 0,
         msg: 'Success',
         data: {
-          token: result
+          token: result.token
         }
       })
       return
@@ -45,9 +54,9 @@ router.post('/signup', async (req, res) => {
   const body = req.body
   if (body && body.username && body.password) {
     if (!config.get('system.allowSignup') && !body.code) {
-      res.status(403).json({
-        code: -1,
-        msg: 'Access denied',
+      res.json({
+        code: -2,
+        msg: 'Param error',
         data: {}
       })
 

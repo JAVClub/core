@@ -55,7 +55,7 @@ app.use(async (req, res, next) => {
     }
   }
 
-  logger.debug(`[UID: ${req.uid}]`, req.method.toUpperCase(), req.path)
+  logger.info(`[UID: ${req.uid}]`, req.method.toUpperCase(), req.path)
 
   if (path.startsWith(pathPrefix + '/auth') || req.uid > 0) return next()
 

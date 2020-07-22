@@ -79,25 +79,28 @@ class User {
   }
 
   /**
-     * Get token by username and password
+     * Check by username and password
      *
      * @param {String} username username
      * @param {String} password password
      *
-     * @returns {String} token or empty string
+     * @returns {Object} token and uid
      */
-  async getTokenByUsernameAndPassword (username, password) {
+  async checkByUsernameAndPassword (username, password) {
     const result = await db('users').where('username', username).select('*').first()
 
     if (result && result.password) {
       if (bcrypt.compareSync(password, result.password)) {
         await db('users').where('token', result.token).update('lastSeen', (new Date()).getTime())
 
-        return result.token
+        return {
+          token: result.token,
+          id: result.id
+        }
       }
     }
 
-    return ''
+    return {}
   }
 
   /**
