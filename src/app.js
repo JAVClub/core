@@ -6,13 +6,6 @@
   })
 })()
 
-const { execSync } = require('child_process')
-const config = require('./module/config')
-const path = require('path')
-const binfile = path.resolve(__dirname, '../node_modules/.bin', 'sequelize')
-
-console.log(execSync(binfile + ' --config config/dev.json --env database db:create ' + config.get('database.database')).toString())
-console.log(execSync(binfile + ' --config config/dev.json --env database db:migrate --debug').toString())
-
+require('./module/migration')
 require('./api/init')
 require('./import/init')

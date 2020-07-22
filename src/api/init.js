@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 const user = require('./../module/user')
 const config = require('./../module/config')
 const cache = require('./../module/cache')
+const permission = require('./../module/permission')
 const Sentry = require('@sentry/node')
 
 const pathPrefix = config.get('system.path')
@@ -45,7 +46,12 @@ app.use(async (req, res, next) => {
       return res
     }, 60000)
     if (uid > 0) {
-      req.uid = uid
+      const per = await cache(`api_checkpermission_${token}`, async () => {
+        const res = await permission.getUserPermissionGroupInfo(uid)
+        return res
+      }, 60000)
+      if (per.rule.banned) req.uid = -1
+      else req.uid = uid
     }
   }
 
@@ -67,6 +73,8 @@ app.use(pathPrefix + '/bookmark', require('./route/bookmark'))
 app.use(pathPrefix + '/file', require('./route/file'))
 app.use(pathPrefix + '/statistic', require('./route/statistic'))
 app.use(pathPrefix + '/user', require('./route/user'))
+app.use(pathPrefix + '/invitation', require('./route/invitation'))
+app.use(pathPrefix + '/group', require('./route/group'))
 
 app.all('*', (req, res) => {
   res.status(404).json({

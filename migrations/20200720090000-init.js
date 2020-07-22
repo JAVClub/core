@@ -354,20 +354,16 @@ module.exports = {
         allowNull: false,
         unique: true
       },
-      status: {
-        type: Sequelize.STRING(1),
-        allowNull: false
-      },
       comment: {
         type: Sequelize.STRING(128),
         allowNull: false
       },
       createTime: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(20),
         allowNull: false
       },
-      updateTime: {
-        type: Sequelize.STRING,
+      lastSeen: {
+        type: Sequelize.STRING(20),
         allowNull: false
       }
     })
@@ -412,7 +408,7 @@ module.exports = {
         defaultValue: 1
       },
       updateTime: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(20),
         allowNull: false
       }
     })
@@ -427,11 +423,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+    queryInterface.dropAllTables()
   }
 }

@@ -5,23 +5,77 @@ const randomString = require('randomstring')
 
 class User {
   /**
-     * Create user
+     * Get users info by id
      *
-     * @param {String} name username
-     * @param {String} password user password
-     *
-     * @returns {Int} username id
+     * @returns {Array} users info
      */
-  async createUser (name, password) {
+  async getUserList (page, size) {
+    const result = await db('users').select('*').paginate({
+      perPage: size,
+      currentPage: page
+    })
+
+    if (!result.data) {
+      return {
+        total: 0,
+        data: []
+      }
+    }
+
+    return {
+      total: result.pagination.total,
+      data: result.data
+    }
+  }
+
+  /**
+   * Create user
+   *
+   * @param {String} username username
+   * @param {String} password user password
+   * @param {Int} groupId permission group id
+   * @param {String=} comment comment
+   * @param {String=} from from
+   *
+   * @returns {Int} username id
+   */
+  async createUser (username, password, groupId, comment = '', from = '') {
+    if (!await this.checkUsername(username)) return -1
+
     const result = await db('users').insert({
-      username: name,
+      username,
       password: bcrypt.hashSync(password, bcrypt.genSaltSync()),
       token: randomString.generate(32),
-      updateTime: (new Date()).getTime(),
+      permission_group: groupId,
+      from,
+      comment,
+      createTime: (new Date()).getTime(),
       lastSeen: (new Date()).getTime()
     }).select('id')
 
     return result[0]
+  }
+
+  /**
+   * Check username availability
+   *
+   * @param {String} username username
+   */
+  async checkUsername (username) {
+    const result = (await db('users').where('username', username).count('*'))[0]['count(*)']
+
+    return result === 0
+  }
+
+  /**
+     * Remove user
+     *
+     * @param {Int} uid user id
+     */
+  async removeUser (uid) {
+    const result = await db('users').where('id', uid).delete()
+
+    return result
   }
 
   /**
@@ -47,6 +101,21 @@ class User {
   }
 
   /**
+     * Get user info by id
+     *
+     * @param {Int} id user id
+     *
+     * @returns {Object} user info
+     */
+  async getUserInfo (id) {
+    const result = await db('users').where('id', id).select('*').first()
+
+    if (!result) return null
+
+    return result
+  }
+
+  /**
      * Change user's username
      *
      * @param {Int} uid user id
@@ -55,6 +124,7 @@ class User {
      * @returns {Int}
      */
   async changeUsername (uid, newUsername) {
+    if (!await this.checkUsername(newUsername)) return -1
     const result = await db('users').where('id', uid).update({
       username: newUsername,
       lastSeen: (new Date()).getTime()
@@ -78,6 +148,38 @@ class User {
       password: password,
       token: randomString.generate(32),
       lastSeen: (new Date()).getTime()
+    })
+
+    return result
+  }
+
+  /**
+     * Change user's group
+     *
+     * @param {Int} uid user id
+     * @param {String} newGroupId new permission group id
+     *
+     * @returns {Int}
+     */
+  async changeGroup (uid, newGroupId) {
+    const result = await db('users').where('id', uid).update({
+      permission_group: newGroupId
+    })
+
+    return result
+  }
+
+  /**
+     * Change user's comment
+     *
+     * @param {Int} uid user id
+     * @param {String} newComment new comment
+     *
+     * @returns {Int}
+     */
+  async changeComment (uid, newComment) {
+    const result = await db('users').where('id', uid).update({
+      comment: newComment
     })
 
     return result

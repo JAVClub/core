@@ -12,7 +12,7 @@ class Video {
      */
   async getVideoInfo (id) {
     logger.debug('Get video info, id', id)
-    const result = await db('videos').where('id', id).select('*')
+    const result = await db('videos').where('id', id).select('*').first()
 
     if (!result) return null
 
