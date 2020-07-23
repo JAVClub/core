@@ -9,7 +9,9 @@
         "corsDomain": [
             "https://yourdomain.com"
         ],
-        "searchParmaNum": 3
+        "searchParmaNum": 3,
+        "allowSignup": false,
+        "defaultGroup": 2
     },
     "database": {
         "dialect": "mysql",
