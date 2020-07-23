@@ -13,6 +13,9 @@
 - 可从公开/私有站点下载数据, 多种选择
 - Docker 自动部署
 - 支持收藏夹
+- 支持公告系统
+- 支持用户系统
+- 支持邀请注册
 - ~~面熟的话大概可以直接白嫖~~
 
 ## 简介
@@ -29,9 +32,9 @@
 
 ## TODO
 
-- [ ] 公告栏
-- [ ] 用户系统
-  - [ ] 邀请注册
+- [x] 公告栏
+- [x] 用户系统
+  - [x] 邀请注册
 
 ## DEMO
 
@@ -65,7 +68,9 @@
 
 ## 部署
 
-**Docker 部署方式请[出门左拐](https://github.com/JAVClub/docker)**
+下面的信息可能有一些繁琐枯燥甚至还有错误, 希望还可见谅, 套用某位 dalao 的话来讲就是一劳永逸, 一旦理解了就没什么困难的了
+
+**Docker 部署方式请[看这里](https://github.com/JAVClub/docker)**
 
 部署之前请确保你拥有/完成以下能力/事情:
 - 一台有稳定国际互联网的服务器
@@ -75,7 +80,7 @@
 - 阅读过《[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)》
 - ~~可以克制住自己想把作者往死里揍心情的能力~~
 
-总共需要部署三样东西, 它们之间关系是这样的:
+要正常工作的话总共需要部署三样东西, 它们之间关系是这样的:
 ```
 fetcher: 抓取种子->推送 qBittorrent 下载->处理->上传 Google Drive
 ↑
@@ -87,35 +92,40 @@ core: 读取 Google Drive 文件列表->导入本地数据库
 ↓
 web: 展示信息
 ↑
-|
-↓
-Workers: 代理 Google Drive 文件及 JAVBus 封面
-↑
-|
+| 用户请求
 ↓
 Vercel: 为 Workers 提供 access token
+↑
+| 302 跳转
+↓
+Workers: 代理 Google Drive 文件及 JAVBus 封面
 ```
 
 ### Fetcher 部署
 
-参考 [JAVClub/fetcher](https://github.com/JAVClub/fetcher)
+参照 [JAVClub/fetcher](https://github.com/JAVClub/fetcher)
 
 ### 代理部署
 
-参考 [JAVClub/proxy](https://github.com/JAVClub/proxy)
+参照 [JAVClub/proxy](https://github.com/JAVClub/proxy)
 
 ### Core&Web 部署
 
 #### Docker
 
-参考 [core - JAVClub/docker](https://github.com/JAVClub/docker/tree/master/core)
+参照 [core - JAVClub/docker](https://github.com/JAVClub/docker/tree/master/core)
 
 #### 非 Docker
 
 ##### 拉取
 
-请确保主机已安装 Node.js 环境 (版本 10.0+)
+请确保主机已安装 Node.js 环境 (版本 12.0+), 如未安装可使用 nvm 进行安装
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+nvm install node # "node" is an alias for the latest version
+```
 
+拉取项目
 ```bash
 git clone https://github.com/JAVClub/core.git JAVClub_core
 cd JAVClub_core
@@ -144,16 +154,18 @@ npm i
         "searchParmaNum": 3
     },
     "database": {
+        "dialect": "mysql",
         "connectionLimit": 5,
-        "host": "127.0.0.1",
-        "user": "javclub",
+        "host": "mysql",
+        "port": 3306,
+        "username": "javclub",
         "password": "javclub",
         "database": "javclub"
     },
     "importer": {
         "settings": {
             "googleDrive": {
-                "queueNum": 5
+                "queueNum": 1
             }
         },
         "cron": [
@@ -165,17 +177,16 @@ npm i
         ]
     },
     "proxy": [
-        "https://your.img.proxy/"
+        "https://proxy.xiaolin.in/"
     ]
 }
-
 ```
 </details>
 
 - **system**
   - path: API 监听的路径
   - corsDomain: cors 头允许的域名
-  - searchParmaNum: 搜索允许的关键词数量
+  - searchParmaNum: 搜索允许的关键词数量(以空格分隔)
 - **importer**
   - settings.googleDrive.queueNum: (Int) Importer 导入时队列并行数
   - cron[].driverId: (Int) 数据库 `drivers` 表中条目的 ID
@@ -184,25 +195,22 @@ npm i
 - **proxy** (Array) 用于代理 Metadata Cover 及 Star Cover 的反代 URL (请求格式: `https://your.img.proxy/https://url.to/imgage.png`)
 
 按照提示修改 `config/dev.json` 并更改相关配置即可
-
-其中 `cron` 字段的相关设定可以暂时不用填写, 下文会有详细讲解
-至于 `proxy` 字段, 如果不想部署图片代理的话也可以直接填写 `[""]`
+  - `system` 部分若无需更改保持默认即可
+  - `database` 部分请修改 `host` `port` `username` `password` `database` 为你自己的信息
+  - `cron` 部分的相关设定可以**暂时不用填写**, 下文会有详细讲解
+  - `proxy` 字段, 如果不想部署图片代理的话也可以直接填写 `[""]`
 
 ##### 数据库
 
-因程序不打算弄太复杂, 所以没有安装界面, 请自行导入数据表
+~~因程序不打算弄太复杂, 所以没有安装界面, 请自行导入数据表~~
 
-推荐使用 PMA 可视化操作
+在最新版本中终于用上了 migration, 所以现在数据表在启动时会自动创建, 默认的用户名 / 密码为 `admin` / `admin`, 请及时修改
 
-数据库文件: https://github.com/JAVClub/docker/blob/master/core/sql.db
+##### 配置 Google Drive 相关
 
-导入后会自动添加第一个用户, 账号密码: `admin/123456`
+core 中的数据来源是 fetcher 上传至 Google Drive 中的数据, 请在使用前 1-2 天部署好 fetcher 以获取足够的数据 (当然你要是想部署完 core 再部署 fetcher 也是没问题的)
 
-##### 配置
-
-core 中的数据来源是 fetcher 上传至 Google Drive 中的数据, 请在使用前 1-2 天部署好 fetcher 以获取足够的数据
-
-首先要做的是往数据库里添加有关 Google Drive 的信息, SQL 命令如下
+首先要做的是往数据库里添加有关 Google Drive 的信息, 样例 SQL 命令如下
 ```sql
 INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `createTime`, `updateTime`) VALUES
 (1, 'My first drive', 'gd', '{\"oAuth\":{\"client_id\":\"【your_client_here】\",\"client_secret\":\"【your_client_secret_here】\",\"redirect_uri\":\"urn:ietf:wg:oauth:2.0:oob\",\"token\":{\"access_token\":\"【your_access_token_here_optional】\",\"refresh_token\":\"【your_refresh_token_here】\",\"scope\":\"https://www.googleapis.com/auth/drive\",\"token_type\":\"Bearer\",\"expiry_date\":1583679345619}},\"drive\":{\"driveId\":\"【your_drive_or_folder_id_here】\"},\"encryption\":{\"secret\":\"【path_ase_secret】\",\"server\":\"【your_gd_proxy_server_here】"}}', 1, '1583679345619', '1583679345619');
@@ -233,21 +241,25 @@ INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `cr
 }
 ```
 - oAuth 中的顾名思义就是 Google API 的鉴权信息, 按照你的凭证填写即可
+  - 凭证相关可使用 [GoIndex Code Builder](https://install.achirou.workers.dev/zh) 来方便地取得, 将生成代码中的 `client_id`、`client_secret`、`refresh_token` 复制到此处即可, 其余位置可留空
 - drive.driveId 是你的云端硬盘 ID, 也就是云端硬盘根目录浏览器地址栏的那一长串东西
 - encryption 是给 Workers 使用的选项
-  - secret 请随便填写串字符, 部署 Workers 时使用的 `aes_password` 请与此处的保持一致
+  - secret 请随便填写串字符, 部署 Workers 时使用的 `password` 请与此处的保持一致
   - server 是你部署的 Workers 的地址, 多个地址用 `,` 隔开
 
-成功添加数据库条目之后, `id` 字段的值就是[上文](#配置文件)中 `cron[].driverId` 以及马上提到的该写的东西
+更改完后将上面一段 JSON 复制到[这里](json.cn)压缩后照本节开头格式插入数据表即可
 
 下一步就是要告诉程序你添加了这个硬盘并且希望扫描/导入这个硬盘中的内容
-那么就只需要在 `dev.json` 中的 `cron` 字段按[上文](#配置文件)中所述添加相应内容即可
+
+还记得[上文](#配置文件)中提到的 `cron` 部分吗? 那里的 `id` 便是这里数据表中自动生成的 `id`
+
+那么就只需要在 `dev.json` 中的 `cron` 字段按中所述添加相应内容即可
 
 到现在 core 应该已经配置完成并可以工作了
 
 ##### 配置 WebUI
 
-到现在只剩下 WebUI 程序就可以正常工作了, 不过关于 Nginx 的使用方法在这里就不多讲了, 只描述应该怎么做
+到现在只剩下 WebUI 程序就可以正常工作了, 为了正常工作需要将 core 的 `/api` 路径代理到你域名下的 `/api` 路径并将静态资源放置于该域名对应目录的根目录下, 请使用你熟悉的 HTTP 服务端软件来执行此操作(如 Nginx, Caddy 等)
 
 首先是拉取并构建 Web UI
 ```bash
@@ -256,13 +268,16 @@ cd JAVClub_web
 cp src/config.example.js src/config.js
 npm i && npm run build
 ```
+
 运行完成之后前端资源就已经构建完成了, 位于 `./dist` 目录下
-这时候只需要在 Nginx 中将除 `/api` 以外的请求重定向至 `./dist/index.html` 文件即可
-至于 `/api` 的请求请转发给 core 核心
+这时候只需要在服务端软件中将除 `/api` 以外的请求重定向至 `./dist` 目录即可
 
 ##### 启动:
 
-`NODE_ENV=dev node src/app.js`
+```bash
+NODE_ENV=dev node src/app.js
+# 以及你服务端的启动命令
+```
 
 没有意外的话现在 Web UI 和 API 服务器应该已经启动并正常工作了, 可以观察一下输出日志中有没有错误 (如果有务必将错误日志提交至 Issue
 
@@ -274,15 +289,30 @@ npm i && npm run build
 
 那么在这里祝你身体健康
 
+## 其余配置
+
+### 权限组
+
+新版本新增了权限系统, 数据库由 `id` `name` `rule` `time` 四个部分组成
+
+其中 `id` 是权限组 ID, `name` 是权限组名, `rule` 是权限组的权限列表, 为 JSON 格式, 如下所示
+```json
+{
+    "admin":true, // 是否为管理员
+    "title":"Admin",
+    "banned":false, // 是否被封禁
+    "invitationNum":-1, // 可以创建的邀请码数量
+    "invitationGroup":2 // 邀请码使用者注册到的权限组
+}
+```
+
+程序启动时会自动创建 `Admin Group` `User Group` `Banned Group` 三个组, 可按需调整参数
+
 ## 后续
 
 先感谢看完这篇废话连篇的使用文档, 有很多东西可能没有说明白, 如果有问题请尽管开 IS 来轰炸我吧
 
 正常来讲现在整套系统应该已经在正常工作了, 如果没有请再次检查是否漏掉了任何一个步骤
-
-如果还是嫌麻烦也可以直接邮箱来硬肛，不保证看得到+发号就是了 (提盘来见就最好了 hhh
-
-不要脸地~~来个广告~~回点血: 自建站总数 ~7w, 每天平均新增 20, 随便[发点电](https://afdian.net/@isXiaoLin)邮箱附截图就可以了 (纯回血, 不保证速度及大陆可用性, 回复期跟 issue 一致
 
 ## FAQ
 
@@ -297,7 +327,7 @@ npm i && npm run build
 
 - 没有 M-Team 的账号怎么办
 
-现在重写后的 fetcher 也已经支持 OneJAV 了, 所以不需要 M-Team 账号也可以正常使用了
+现在重写后的 fetcher 也已经支持 OneJAV 了, 所以不需要任何账号都可以正常使用了
 
 - 这玩意儿真的有人成功部署过吗
 
