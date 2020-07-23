@@ -107,12 +107,12 @@ class Video {
      * @returns {Int} Video id
      */
   async createVideo (info, fileIds, version = 1) {
-    const JAVID = info.JAVID || (info.company + '-' + info.id)
+    if (info.company && info.id) info.JAVID = info.company + '-' + info.id
 
-    const metadataId = await metadata.getMetadataId(JAVID, version, info.JAVMetadata)
+    const metadataId = await metadata.getMetadataId(info.JAVID, version, info.JAVMetadata)
     logger.debug('Metadata id', metadataId)
 
-    if (metadataId === 0) {
+    if (!metadataId || metadata === 0) {
       return
     }
 
@@ -137,7 +137,7 @@ class Video {
 
     const result = await db('videos').insert(dbData).select('id')
 
-    logger.info(`[${JAVID}] Video created, id`, result[0])
+    logger.info(`[${info.JAVID}] Video created, id`, result[0])
     return result[0]
   }
 

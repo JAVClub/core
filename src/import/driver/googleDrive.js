@@ -71,11 +71,15 @@ class googleDrive {
      * @returns {Promise} Video create Promise
      */
   async handleInfoDotJSON (info, fileInfo) {
+    this.logger.debug('Info', info)
     if (!info.JAVID && (!info.company || !info.id)) {
       this.logger.warn('Info invalid', info)
       return
     }
-    const JAVID = info.JAVID || (info.company + '-' + info.id)
+
+    let JAVID = info.JAVID
+    if (info.company && info.id) JAVID = info.company + '-' + info.id
+
     const version = parseInt(info.version || 1)
     this.logger.info('Processing', JAVID)
 
