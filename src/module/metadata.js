@@ -138,6 +138,11 @@ class Metadata {
           return 0
         }
 
+        const anotherMetadataId = await db('metadatas').where('title', JAVinfo.title).first()
+        if (anotherMetadataId && anotherMetadataId.id) {
+          return anotherMetadataId.id
+        }
+
         const dbData = {
           title: JAVinfo.title,
           companyName: JAVID.split('-')[0],
