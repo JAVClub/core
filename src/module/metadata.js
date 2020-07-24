@@ -44,7 +44,8 @@ class Metadata {
       currentPage: page
     })
 
-    const total = result.pagination.total
+    let total = await db('metadatas').count()
+    total = total[0]['count(*)']
 
     result = result.data
     if (!result) return []
@@ -75,7 +76,8 @@ class Metadata {
       currentPage: page
     })
 
-    const total = result.pagination.total
+    let total = await db(`${mapping.type}_mapping`).where(mapping.column, metaId).count()
+    total = total[0]['count(*)']
 
     result = result.data
     if (!result) return []
@@ -309,7 +311,8 @@ class Metadata {
       currentPage: page
     })
 
-    const total = result.pagination.total
+    let total = await db(type).count()
+    total = total[0]['count(*)']
 
     result = result.data
     if (!result) return []
@@ -483,11 +486,13 @@ class Metadata {
       })
     }
 
+    let total = await result.clone().count()
+    total = total[0]['count(*)']
+
     result = await result.select('*').paginate({
       perPage: size,
       currentPage: page
     })
-    const total = result.pagination.total
 
     result = result.data
     if (!result) return []

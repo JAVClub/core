@@ -68,14 +68,15 @@ class Bookmark {
       currentPage: page
     })
 
-    const total = metadatas.pagination.total
-
     const processed = []
     metadatas = metadatas.data
     for (const i in metadatas) {
       const item = metadatas[i]
       processed.push(await metadata.getMetadataById(item.metadataId))
     }
+
+    let total = await db('bookmarks_mapping').where('bookmarkId', id).count()
+    total = total[0]['count(*)']
 
     return {
       total,

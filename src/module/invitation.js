@@ -118,8 +118,12 @@ class Invitation {
       }
     }
 
+    let total = db('invitations')
+    if (uid !== -1) total = total.where('creator', uid)
+    total = (await total.count())[0]['count(*)']
+
     return {
-      total: result.pagination.total,
+      total,
       data: result.data
     }
   }

@@ -22,8 +22,11 @@ class User {
       }
     }
 
+    let total = await db('users').count()
+    total = total[0]['count(*)']
+
     return {
-      total: result.pagination.total,
+      total,
       data: result.data
     }
   }

@@ -20,8 +20,11 @@ class Permission {
       }
     }
 
+    let total = await db('permission_groups').count()
+    total = total[0]['count(*)']
+
     return {
-      total: result.pagination.total,
+      total,
       data: result.data
     }
   }
