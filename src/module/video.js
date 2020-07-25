@@ -149,7 +149,7 @@ class Video {
      * @returns {Boolean}
      */
   async isExistByHash (hash) {
-    const result = await db('videos').whereRaw('JSON_EXTRACT(videoMetadata, \'$.hash\') = ?', hash).count()
+    const result = await db('videos').where('videoMetadata', 'like', `${hash}%`).count()
     if (result && result[0]['count(*)'] === 0) return false
     return true
   }

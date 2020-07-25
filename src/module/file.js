@@ -14,16 +14,21 @@ class File {
      * @returns {Object} File ids
      */
   async createFilesRecord (driverId, storageDataList) {
+    // TODO: optimize
     logger.debug('Creating file record', storageDataList)
 
     const fileIds = {}
 
-    let result = db('files').where('driverId', driverId).where('storageData', storageDataList[0])
-    for (const i in storageDataList) {
-      const item = storageDataList[i]
-      if (i === 0) continue
-      result = result.orWhere('storageData', item)
-    }
+    let result = db('files').where('driverId', driverId).andWhere((builder) => {
+      builder.where('storageData', storageDataList[0])
+
+      for (const i in storageDataList) {
+        const item = storageDataList[i]
+        if (i === 0) continue
+        builder.orWhere('storageData', item)
+      }
+    })
+
     result = await result.select('id', 'storageData')
 
     for (const i in result) {
