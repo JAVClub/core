@@ -390,11 +390,11 @@ module.exports = {
         allowNull: false
       },
       videoMetadata: {
-        type: Sequelize.JSON,
+        type: Sequelize.STRING(512),
         allowNull: false
       },
       storyboardFileIdSet: {
-        type: Sequelize.JSON,
+        type: Sequelize.STRING(512),
         allowNull: false
       },
       isHiden: {

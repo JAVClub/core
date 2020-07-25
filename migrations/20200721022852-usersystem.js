@@ -62,7 +62,7 @@ module.exports = {
         allowNull: false
       },
       rule: {
-        type: Sequelize.JSON,
+        type: Sequelize.STRING(256),
         allowNull: false
       },
       createTime: {
