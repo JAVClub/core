@@ -394,7 +394,7 @@ module.exports = {
         allowNull: false
       },
       storyboardFileIdSet: {
-        type: Sequelize.STRING(512),
+        type: Sequelize.STRING(1024),
         allowNull: false
       },
       isHiden: {
