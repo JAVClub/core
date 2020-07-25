@@ -119,7 +119,7 @@ class Metadata {
           JAVinfo = await this.fetchNew(JAVID)
           logger.debug('JAVinfo', JAVinfo)
 
-          if (!JAVinfo || !JAVinfo.tags.length || !JAVinfo.stars.length) {
+          if (!JAVinfo || !JAVinfo.tags.length) {
             logger.info('Invalid info', JAVinfo)
             await ignore.addIgnore(JAVID)
             return 0
@@ -127,7 +127,7 @@ class Metadata {
           break
 
         case 2:
-          if (!JAVmetadata || !JAVmetadata.tags.length || !JAVmetadata.stars.length) {
+          if (!JAVmetadata || !JAVmetadata.tags.length) {
             logger.info('Invalid version 2 JAV metadata', JAVmetadata)
             return 0
           }
@@ -166,6 +166,15 @@ class Metadata {
         const promises = []
 
         if (JAVinfo.series) promises.push(this.attachMeta('series', metadataId, JAVinfo.series, null))
+
+        if (!JAVinfo.stars.length) {
+          JAVinfo.stars = [
+            {
+              name: '素人',
+              img: 'https://pics.dmm.co.jp/mono/actjpgs/nowprinting.gif'
+            }
+          ]
+        }
 
         for (const item of _.uniqBy(JAVinfo.stars, 'name')) {
           promises.push(this.attachMeta('star', metadataId, item.name, item.img))
