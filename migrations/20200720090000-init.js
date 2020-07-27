@@ -126,7 +126,8 @@ module.exports = {
       },
       data: {
         type: Sequelize.STRING(30),
-        allowNull: false
+        allowNull: false,
+        unique: true
       }
     })
 
