@@ -123,6 +123,16 @@ router.get('/check', async (req, res) => {
   }
 })
 
+router.get('/getStatus', async (req, res) => {
+  res.json({
+    code: 0,
+    msg: 'Success',
+    data: {
+      allowSignup: config.get('system.allowSignup')
+    }
+  })
+})
+
 router.all('/logout', (req, res) => {
   res.clearCookie('token')
   res.json({
