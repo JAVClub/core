@@ -235,6 +235,7 @@ INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `cr
         }
     },
     "drive":{
+        "type": "user",
         "driveId":"987b3d98q7deuiedsr"
     },
     "encryption":{
@@ -245,7 +246,8 @@ INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `cr
 ```
 - oAuth 中的顾名思义就是 Google API 的鉴权信息, 按照你的凭证填写即可
   - 凭证相关可使用 [GoIndex Code Builder](https://install.achirou.workers.dev/zh) 来方便地取得, 将生成代码中的 `client_id`、`client_secret`、`refresh_token` 复制到此处即可, 其余位置可留空
-- drive.driveId 是你的云端硬盘 ID, 也就是云端硬盘根目录浏览器地址栏的那一长串东西
+- drive.type 可以填写"user"或"shared", "user"会扫描用户硬盘的Jav info,"shared"则是扫描共享云盘 
+- drive.driveId 是你的共享云端硬盘 ID, 也就是共享云端硬盘根目录浏览器地址栏的那一长串东西 (若type填写"user"则可以为空)
 - encryption 是给 Workers 使用的选项
   - secret 请随便填写串字符, 部署 Workers 时使用的 `password` 请与此处的保持一致
   - server 是你部署的 Workers 的地址, 多个地址用 `,` 隔开

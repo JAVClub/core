@@ -119,16 +119,31 @@ class GoogleDrive {
     this.logger.info(`Getting ${(full) ? 'full ' : ''}file list of keyword`, q)
     do {
       this.logger.debug(`Getting page ${counter}`)
-      const params = {
-        driveId: this._data.drive.driveId,
-        corpora: 'drive',
-        includeItemsFromAllDrives: true,
-        supportsTeamDrives: true,
-        pageSize: pageSize || 1000,
-        orderBy: orderBy || 'modifiedTime desc',
-        q,
-        fields: 'nextPageToken, files(' + (fields || 'id, name, modifiedTime, parents, size') + ')'
+      let params = {};
+      if (this._data.drive.type == "shared") {
+        params = {
+          driveId: this._data.drive.driveId,
+          corpora: 'drive',
+          includeItemsFromAllDrives: true,
+          supportsTeamDrives: true,
+          pageSize: pageSize || 1000,
+          orderBy: orderBy || 'modifiedTime desc',
+          q,
+          fields: 'nextPageToken, files(' + (fields || 'id, name, modifiedTime, parents, size') + ')'
+        }
+      } else {
+        params = {
+          corpora: 'user',
+          includeItemsFromAllDrives: true,
+          supportsTeamDrives: true,
+          pageSize: pageSize || 1000,
+          orderBy: orderBy || 'modifiedTime desc',
+          q,
+          fields: 'nextPageToken, files(' + (fields || 'id, name, modifiedTime, parents, size') + ')'
+        }
       }
+    
+      
       if (pageToken) params.pageToken = pageToken
       let res
       try {
@@ -196,10 +211,8 @@ class GoogleDrive {
     try {
       res = await pRetry(async () => {
         const result = await this.driveClient.files.get({
-          corpora: 'drive',
           includeItemsFromAllDrives: true,
           supportsTeamDrives: true,
-          driveId: this._data.drive.driveId,
           alt: 'media',
           fileId
         }, {
