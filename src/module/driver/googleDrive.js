@@ -119,16 +119,29 @@ class GoogleDrive {
     this.logger.info(`Getting ${(full) ? 'full ' : ''}file list of keyword`, q)
     do {
       this.logger.debug(`Getting page ${counter}`)
-      const params = {
-        driveId: this._data.drive.driveId,
-        corpora: 'drive',
-        includeItemsFromAllDrives: true,
-        supportsTeamDrives: true,
+      let params = {
         pageSize: pageSize || 1000,
         orderBy: orderBy || 'modifiedTime desc',
         q,
         fields: 'nextPageToken, files(' + (fields || 'id, name, modifiedTime, parents, size') + ')'
       }
+
+      if (this._data.drive.type === 'user') {
+        params = {
+          ...params,
+          corpora: 'user',
+          includeItemsFromAllDrives: false
+        }
+      } else {
+        params = {
+          ...params,
+          driveId: this._data.drive.driveId,
+          corpora: 'drive',
+          includeItemsFromAllDrives: true,
+          supportsTeamDrives: true
+        }
+      }
+
       if (pageToken) params.pageToken = pageToken
       let res
       try {
@@ -195,14 +208,28 @@ class GoogleDrive {
 
     try {
       res = await pRetry(async () => {
-        const result = await this.driveClient.files.get({
-          corpora: 'drive',
-          includeItemsFromAllDrives: true,
-          supportsTeamDrives: true,
-          driveId: this._data.drive.driveId,
+        let params = {
           alt: 'media',
           fileId
-        }, {
+        }
+
+        if (this._data.drive.type === 'user') {
+          params = {
+            ...params,
+            corpora: 'user',
+            includeItemsFromAllDrives: false
+          }
+        } else {
+          params = {
+            ...params,
+            driveId: this._data.drive.driveId,
+            corpora: 'drive',
+            includeItemsFromAllDrives: true,
+            supportsTeamDrives: true
+          }
+        }
+
+        const result = await this.driveClient.files.get(params, {
           responseType: 'arraybuffer'
         })
 

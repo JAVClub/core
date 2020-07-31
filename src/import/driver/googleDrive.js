@@ -46,12 +46,15 @@ class googleDrive {
         res = res.toString()
 
         this.logger.debug(`File ${info.id}'s content`, res)
-        if (res && JSON.parse(res)) {
-          return await this.handleInfoDotJSON(JSON.parse(res), info)
+        try {
+          if (res && JSON.parse(res)) {
+            return await this.handleInfoDotJSON(JSON.parse(res), info)
+          } else {
+            this.logger.error('Invalid info.json content', info.id, res)
+          }
+        } catch (error) {
+          this.logger.error('Info.json parsed error, skipped')
         }
-
-        this.logger.error('Invalid file of id', info.id, res)
-        throw new Error('Invalid file of id', info.id)
       })
     })
 
