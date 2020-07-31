@@ -83,7 +83,7 @@
 - 阅读过《[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)》
 - ~~可以克制住自己想把作者往死里揍心情的能力~~
 
-要正常工作的话总共需要部署三样东西, 它们之间关系是这样的:
+要正常工作的话总共需要部署几样东西, 它们之间关系是这样的:
 ```
 fetcher: 抓取种子->推送 qBittorrent 下载->处理->上传 Google Drive
 ↑
@@ -96,9 +96,9 @@ core: 读取 Google Drive 文件列表->导入本地数据库
 web: 展示信息
 ↑
 | 用户请求
-↓
+|
 Vercel: 为 Workers 提供 access token
-↑
+|
 | 302 跳转
 ↓
 Workers: 代理 Google Drive 文件及 JAVBus 封面
@@ -157,7 +157,9 @@ npm i
         "corsDomain": [
             "https://yourdomain.com"
         ],
-        "searchParmaNum": 3
+        "searchParmaNum": 3,
+        "allowSignup": false,
+        "defaultGroup": 2
     },
     "database": {
         "dialect": "mysql",
@@ -193,6 +195,7 @@ npm i
   - path: API 监听的路径
   - corsDomain: cors 头允许的域名
   - searchParmaNum: 搜索允许的关键词数量(以空格分隔)
+  - defaultGroup: 用户通过直接注册进入的权限组 ID (保持默认即可)
 - **importer**
   - settings.googleDrive.queueNum: (Int) Importer 导入时队列并行数
   - cron[].driverId: (Int) 数据库 `drivers` 表中条目的 ID
@@ -238,7 +241,8 @@ INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `cr
         }
     },
     "drive":{
-        "driveId":"987b3d98q7deuiedsr"
+        "driveId":"987b3d98q7deuiedsr",
+        "type": "shared"
     },
     "encryption":{
         "secret":"secret",
@@ -248,7 +252,9 @@ INSERT INTO `drivers` (`id`, `name`, `driverType`, `driverData`, `isEnable`, `cr
 ```
 - oAuth 中的顾名思义就是 Google API 的鉴权信息, 按照你的凭证填写即可
   - 凭证相关可使用 [GoIndex Code Builder](https://install.achirou.workers.dev/zh) 来方便地取得, 将生成代码中的 `client_id`、`client_secret`、`refresh_token` 复制到此处即可, 其余位置可留空
-- drive.driveId 是你的云端硬盘 ID, 也就是云端硬盘根目录浏览器地址栏的那一长串东西
+- drive
+  - driveId 是你的云端硬盘 ID, 也就是云端硬盘根目录浏览器地址栏的那一长串东西
+  - type[optional] 可选 `user` 或 `shared`, 选择 `user` 时无需填写 `driveId`, 代表 `我的云端硬盘`
 - encryption 是给 Workers 使用的选项
   - secret 请随便填写串字符, 部署 Workers 时使用的 `password` 请与此处的保持一致
   - server 是你部署的 Workers 的地址, 多个地址用 `,` 隔开
