@@ -18,10 +18,7 @@ router.get('/getURL/:str', async (req, res) => {
   const arr = []
   for (const i in str) arr.push(parseInt(str[i]))
 
-  const result = await cache(`api_file_get_${str}`, async () => {
-    const res = await file.getFilesURL(_.chunk(arr, 100)[0])
-    return res
-  })
+  const result = await cache(`api_file_get_${str}`, file.getFilesURL(_.chunk(arr, 100)[0]))
 
   res.json({
     code: 0,
