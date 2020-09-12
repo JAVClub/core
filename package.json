@@ -41,7 +41,7 @@
     "minimist": ">=1.2.2",
     "mysql": "^2.18.1",
     "mysql2": "^2.1.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "p-queue": "^6.3.0",
     "p-retry": "^4.2.0",
     "promise-queue-plus": "^1.2.2",
